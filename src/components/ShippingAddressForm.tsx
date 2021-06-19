@@ -1,15 +1,48 @@
 import React, { useState } from 'react';
 import countries from '../data/countries';
 
-const ShippingAddressForm = () => {
+interface Props {
+  customerId: string;
+  subscription: any;
+  setUpdateAddress: (value: React.SetStateAction<boolean>) => void;
+}
+
+const ShippingAddressForm = (props: Props) => {
+  const { subscription } = props;
   const Countries: { [key: string]: string[][] } = countries;
+  const [viewProvince, setViewProvince] = useState<boolean>(false);
   const [selectedCountry, setSelectedCountry] = useState<string>();
   const [provinces, setProvinces] = useState<string[][]>();
+  // data
+  const address = subscription.deliveryMethod.address;
+  const [company, setCompany] = useState<string>(address.company);
+  const [address1, setAddress1] = useState<string>(address.address1);
+  const [address2, setAddress2] = useState<string>(address.address2);
+  const [city, setCity] = useState<string>(address.city);
+  const [province, setProvince] = useState<string>(address.province);
+  const [country, setCountry] = useState<string>(address.country);
+  const [zip, setZip] = useState<string>(address.zip);
+  const [name, setName] = useState<string>(address.name);
+  const [firstName, setFirstName] = useState<string>(address.firstName);
+  const [lastName, setLastName] = useState<string>(address.lastName);
+  const [phone, setPhone] = useState<string>(address.phone);
 
   const handleCountryChange = (event: { target: { value: any } }) => {
-    const country = event.target.value;
-    setSelectedCountry(country);
-    setProvinces(Countries[country]);
+    const c = event.target.value;
+    console.log('SETTING COUNTRY', c);
+    setCountry(c);
+    if (Countries[c]) {
+      setProvinces(Countries[c]);
+      setViewProvince(true);
+    } else {
+      setViewProvince(false);
+    }
+  };
+
+  const handleProvinceChange = (event: { target: { value: any } }) => {
+    const p = event.target.value;
+    console.log('SETTING PROVINCE', p);
+    setProvince(p);
   };
 
   return (
@@ -19,7 +52,12 @@ const ShippingAddressForm = () => {
         <div className="grid">
           <div className="grid__item medium-up--one-half">
             <label htmlFor="firstName">First Name</label>
-            <input type="text" id="firstName" name="first_name" value="Test" />
+            <input
+              type="text"
+              id="firstName"
+              name="first_name"
+              value={firstName}
+            />
           </div>
 
           <div className="grid__item medium-up--one-half">
@@ -28,24 +66,24 @@ const ShippingAddressForm = () => {
               type="text"
               id="lastname"
               name="last_name"
-              value="Customer"
+              value={lastName}
             />
           </div>
         </div>
 
         <label htmlFor="company">Company</label>
-        <input type="text" id="company" name="company" value="" />
+        <input type="text" id="company" name="company" value={company} />
 
         <label htmlFor="address1">Address</label>
-        <input type="text" id="address1" name="address1" value="" />
+        <input type="text" id="address1" name="address1" value={address1} />
 
         <label htmlFor="address2">Apartment, suite, etc.</label>
-        <input type="text" id="address2" name="address2" value="" />
+        <input type="text" id="address2" name="address2" value={address2} />
 
         <div className="grid">
           <div className="grid__item medium-up--one-half">
             <label htmlFor="city">City</label>
-            <input type="text" id="city" name="city" value="" />
+            <input type="text" id="city" name="city" value={city} />
           </div>
           <div className="grid__item medium-up--one-half">
             <label htmlFor="Country">Country/Region</label>
@@ -53,10 +91,9 @@ const ShippingAddressForm = () => {
               id="country"
               className="address-country-option"
               name="country"
-              data-default=""
+              value={country}
               onChange={handleCountryChange}
             >
-              <option value="United States">United States</option>
               <option value="---">---</option>
               <option value="Afghanistan">Afghanistan</option>
               <option value="Aland Islands">Åland Islands</option>
@@ -337,29 +374,36 @@ const ShippingAddressForm = () => {
           </div>
         </div>
 
-        <div id="provinceContainer">
-          <label htmlFor="province">Province</label>
-          <select id="province" name="province" data-default="">
-            {provinces &&
-              provinces.map((province: string[]) => {
-                return (
-                  <option key={province[0]} value={province[0]}>
-                    {province[1]}
-                  </option>
-                );
-              })}
-          </select>
-        </div>
+        {viewProvince && (
+          <div id="provinceContainer">
+            <label htmlFor="province">Province</label>
+            <select
+              id="province"
+              name="province"
+              value={province}
+              onChange={handleProvinceChange}
+            >
+              {provinces &&
+                provinces.map((province: string[]) => {
+                  return (
+                    <option key={province[0]} value={province[0]}>
+                      {province[1]}
+                    </option>
+                  );
+                })}
+            </select>
+          </div>
+        )}
 
         <div className="grid">
           <div className="grid__item">
             <label htmlFor="zip">Postal/Zip Code</label>
-            <input type="text" id="zip" name="zip]" value="" />
+            <input type="text" id="zip" name="zip]" value={zip} />
           </div>
 
           <div className="grid__item">
             <label htmlFor="phone">Phone</label>
-            <input type="tel" id="phone" name="phone" value="" />
+            <input type="tel" id="phone" name="phone" value={phone} />
           </div>
         </div>
       </form>

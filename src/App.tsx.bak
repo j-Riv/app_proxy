@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
 import './App.css';
 import { formatDate, formatSubscriptionId } from './utils';
-import ShippingAddressForm from './components/ShippingAddressForm';
 
 const App = () => {
   console.log(window.location);
@@ -10,8 +9,6 @@ const App = () => {
 
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<any[]>();
-  const [subscription, setSubscription] = useState<any>(null);
-  const [updateAddress, setUpdateAddress] = useState<boolean>(false);
 
   const getSubscriptions = async (customerId: string) => {
     try {
@@ -113,114 +110,96 @@ const App = () => {
     }
   };
 
-  const handleUpdateAddress = (subscription: any) => {
-    setSubscription(subscription);
-    setUpdateAddress(true);
-  };
-
   return (
     <div className="App">
-      {updateAddress && customerId && subscription && (
-        <ShippingAddressForm
-          customerId={customerId}
-          subscription={subscription}
-          setUpdateAddress={setUpdateAddress}
-        />
-      )}
-
-      {customerId && subscriptions && (
-        <table className="responsive-table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Status</th>
-              <th scope="col">Billing Policy</th>
-              <th scope="col">Next Billing Date</th>
-              <th scope="col">Products</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subscriptions.map((subscription: any) => {
-              console.log('SUBSCRIPTION', subscription);
-              const s = subscription.node;
-              return (
-                <tr key={subscription.node.id}>
-                  <td>{formatSubscriptionId(s.id)}</td>
-                  <td>{s.status}</td>
-                  <td>
-                    {s.billingPolicy.intervalCount}{' '}
-                    {s.billingPolicy.interval.toLowerCase()}
-                    (s)
-                  </td>
-                  <td>{formatDate(s.nextBillingDate)}</td>
-                  <td>
-                    {s.lines.edges.map((line: any) => {
-                      const l = line.node;
-                      return (
-                        <span key={line.node.id}>
-                          {l.title} - {l.variantTitle} x {l.quantity}
-                        </span>
-                      );
-                    })}
-                  </td>
-                  <td>
-                    {s.status === 'ACTIVE' ? (
+      <header className="App-header">
+        {customerId && subscriptions && (
+          <table className="responsive-table">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Status</th>
+                <th scope="col">Billing Policy</th>
+                <th scope="col">Next Billing Date</th>
+                <th scope="col">Products</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {subscriptions.map((subscription: any) => {
+                console.log('SUBSCRIPTION', subscription);
+                const s = subscription.node;
+                return (
+                  <tr key={subscription.node.id}>
+                    <td>{formatSubscriptionId(s.id)}</td>
+                    <td>{s.status}</td>
+                    <td>
+                      {s.billingPolicy.intervalCount}{' '}
+                      {s.billingPolicy.interval.toLowerCase()}
+                      (s)
+                    </td>
+                    <td>{formatDate(s.nextBillingDate)}</td>
+                    <td>
+                      {s.lines.edges.map((line: any) => {
+                        const l = line.node;
+                        return (
+                          <span key={line.node.id}>
+                            {l.title} - {l.variantTitle} x {l.quantity}
+                          </span>
+                        );
+                      })}
+                    </td>
+                    <td>
+                      {s.status === 'ACTIVE' ? (
+                        <button
+                          className="btn btn--small"
+                          type="button"
+                          onClick={() =>
+                            updateStatus(customerId, s.id, Status.PAUSE)
+                          }
+                        >
+                          PAUSE
+                        </button>
+                      ) : (
+                        <button
+                          className="btn btn--small"
+                          type="button"
+                          onClick={() =>
+                            updateStatus(customerId, s.id, Status.ACTIVE)
+                          }
+                        >
+                          Activate
+                        </button>
+                      )}
                       <button
                         className="btn btn--small"
                         type="button"
                         onClick={() =>
-                          updateStatus(customerId, s.id, Status.PAUSE)
+                          updateStatus(customerId, s.id, Status.CANCEL)
                         }
                       >
-                        PAUSE
+                        CANCEL
                       </button>
-                    ) : (
                       <button
                         className="btn btn--small"
                         type="button"
                         onClick={() =>
-                          updateStatus(customerId, s.id, Status.ACTIVE)
+                          updatePaymentMethod(
+                            customerId,
+                            s.customerPaymentMethod.id
+                          )
                         }
                       >
-                        Activate
+                        UPDATE PAYMENT METHOD
                       </button>
-                    )}
-                    <button
-                      className="btn btn--small"
-                      type="button"
-                      onClick={() =>
-                        updateStatus(customerId, s.id, Status.CANCEL)
-                      }
-                    >
-                      CANCEL
-                    </button>
-                    <button
-                      className="btn btn--small"
-                      type="button"
-                      onClick={() =>
-                        updatePaymentMethod(
-                          customerId,
-                          s.customerPaymentMethod.id
-                        )
-                      }
-                    >
-                      UPDATE PAYMENT METHOD
-                    </button>
-                    <button
-                      className="btn btn--small"
-                      type="button"
-                      onClick={() => handleUpdateAddress(s)}
-                    >
-                      UPDATE SHIP ADDRESS
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
+      </header>
     </div>
   );
 };
