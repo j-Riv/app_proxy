@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
 import '../App.css';
 import { formatDate, formatSubscriptionId } from '../utils';
+import { SubscriptionNode, LineNode } from '../types/subscription';
 
 const Subscriptions = () => {
   console.log(window.location);
   const shop_name = 'https://sample-embedded-app-development.myshopify.com';
 
   const [customerId, setCustomerId] = useState<string | null>(null);
-  const [subscriptions, setSubscriptions] = useState<any[]>();
+  const [subscriptions, setSubscriptions] = useState<SubscriptionNode[]>();
 
   const getSubscriptions = async (customerId: string) => {
     try {
@@ -126,7 +127,7 @@ const Subscriptions = () => {
               </tr>
             </thead>
             <tbody>
-              {subscriptions.map((subscription: any) => {
+              {subscriptions.map((subscription: SubscriptionNode) => {
                 console.log('SUBSCRIPTION', subscription);
                 const s = subscription.node;
                 return (
@@ -140,7 +141,7 @@ const Subscriptions = () => {
                     </td>
                     <td>{formatDate(s.nextBillingDate)}</td>
                     <td>
-                      {s.lines.edges.map((line: any) => {
+                      {s.lines.edges.map((line: LineNode) => {
                         const l = line.node;
                         return (
                           <span key={line.node.id}>

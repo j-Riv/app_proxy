@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
 import './App.css';
 import { formatDate, formatSubscriptionId } from './utils';
+import { SubscriptionNode, Subscription, LineNode } from './types/subscription';
 import ShippingAddressForm from './components/ShippingAddressForm';
 
 const App = () => {
@@ -9,8 +10,8 @@ const App = () => {
   const shopName = 'https://sample-embedded-app-development.myshopify.com';
 
   const [customerId, setCustomerId] = useState<string | null>(null);
-  const [subscriptions, setSubscriptions] = useState<any[]>();
-  const [subscription, setSubscription] = useState<any>(null);
+  const [subscriptions, setSubscriptions] = useState<SubscriptionNode[]>();
+  const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [updateAddress, setUpdateAddress] = useState<boolean>(false);
 
   const getSubscriptions = async (customerId: string) => {
@@ -110,7 +111,7 @@ const App = () => {
     }
   };
 
-  const handleUpdateAddress = (subscription: any) => {
+  const handleUpdateAddress = (subscription: Subscription) => {
     setSubscription(subscription);
     setUpdateAddress(true);
   };
@@ -139,7 +140,7 @@ const App = () => {
             </tr>
           </thead>
           <tbody>
-            {subscriptions.map((subscription: any) => {
+            {subscriptions.map((subscription: SubscriptionNode) => {
               console.log('SUBSCRIPTION', subscription);
               const s = subscription.node;
               return (
@@ -153,7 +154,7 @@ const App = () => {
                   </td>
                   <td>{formatDate(s.nextBillingDate)}</td>
                   <td>
-                    {s.lines.edges.map((line: any) => {
+                    {s.lines.edges.map((line: LineNode) => {
                       const l = line.node;
                       return (
                         <span key={line.node.id}>

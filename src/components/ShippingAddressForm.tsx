@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Subscription } from '../types/subscription';
 import countries from '../data/countries';
 
 interface Props {
   shopName: string;
   customerId: string;
-  subscription: any;
+  subscription: Subscription;
   setUpdateAddress: (value: React.SetStateAction<boolean>) => void;
 }
 
