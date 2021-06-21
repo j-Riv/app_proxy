@@ -1,17 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import countries from '../data/countries';
 
 interface Props {
+  shopName: string;
   customerId: string;
   subscription: any;
   setUpdateAddress: (value: React.SetStateAction<boolean>) => void;
 }
 
 const ShippingAddressForm = (props: Props) => {
-  const { subscription } = props;
+  const { subscription, shopName } = props;
   const Countries: { [key: string]: string[][] } = countries;
   const [viewProvince, setViewProvince] = useState<boolean>(false);
-  const [selectedCountry, setSelectedCountry] = useState<string>();
+  // const [selectedCountry, setSelectedCountry] = useState<string>();
   const [provinces, setProvinces] = useState<string[][]>();
   // data
   const address = subscription.deliveryMethod.address;
@@ -22,12 +23,21 @@ const ShippingAddressForm = (props: Props) => {
   const [province, setProvince] = useState<string>(address.province);
   const [country, setCountry] = useState<string>(address.country);
   const [zip, setZip] = useState<string>(address.zip);
-  const [name, setName] = useState<string>(address.name);
+  // const [name, setName] = useState<string>(address.name);
   const [firstName, setFirstName] = useState<string>(address.firstName);
   const [lastName, setLastName] = useState<string>(address.lastName);
   const [phone, setPhone] = useState<string>(address.phone);
 
-  const handleCountryChange = (event: { target: { value: any } }) => {
+  useEffect(() => {
+    if (Countries[country]) {
+      setProvinces(Countries[country]);
+      setViewProvince(true);
+    } else {
+      setViewProvince(false);
+    }
+  }, []);
+
+  const handleCountryChange = (event: { target: { value: string } }) => {
     const c = event.target.value;
     console.log('SETTING COUNTRY', c);
     setCountry(c);
@@ -39,10 +49,100 @@ const ShippingAddressForm = (props: Props) => {
     }
   };
 
-  const handleProvinceChange = (event: { target: { value: any } }) => {
-    const p = event.target.value;
-    console.log('SETTING PROVINCE', p);
-    setProvince(p);
+  const handleProvinceChange = (event: { target: { value: string } }) => {
+    const province = event.target.value;
+    setProvince(province);
+  };
+
+  const handleFirstNameChange = (event: { target: { value: string } }) => {
+    const fn = event.target.value;
+    setFirstName(fn);
+  };
+
+  const handleLastNameChange = (event: { target: { value: string } }) => {
+    const ln = event.target.value;
+    setLastName(ln);
+  };
+
+  const handleCompanyChange = (event: { target: { value: string } }) => {
+    const company = event.target.value;
+    setCompany(company);
+  };
+
+  const handleAddress1Change = (event: { target: { value: string } }) => {
+    const addr1 = event.target.value;
+    setAddress1(addr1);
+  };
+
+  const handleAddress2Change = (event: { target: { value: string } }) => {
+    const addr2 = event.target.value;
+    setAddress2(addr2);
+  };
+
+  const handleCityChange = (event: { target: { value: string } }) => {
+    const city = event.target.value;
+    setCity(city);
+  };
+
+  const handleZipChange = (event: { target: { value: string } }) => {
+    const zip = event.target.value;
+    setZip(zip);
+  };
+
+  const handlePhoneChange = (event: { target: { value: string } }) => {
+    const phone = event.target.value;
+    setPhone(phone);
+  };
+
+  const updateShippingAddress = async () => {
+    try {
+      console.log(
+        'UPDATING ADDRESS',
+        JSON.stringify({
+          subscriptionContractId: subscription.id,
+          address1,
+          address2,
+          city,
+          province,
+          country,
+          zip,
+          firstName,
+          lastName,
+          company,
+          phone,
+        })
+      );
+      console.log('LETS POST');
+      const response = await fetch(
+        `${shopName}/apps/app_proxy/subscription/address`,
+        {
+          method: 'POST',
+          body: JSON.stringify({
+            subscriptionContractId: subscription.id,
+            address1,
+            address2,
+            city,
+            province,
+            country,
+            zip,
+            firstName,
+            lastName,
+            company,
+            phone,
+          }),
+        }
+      );
+      console.log('UPDATE SHIPPING ADDRESS RESPONSE', response);
+      const data = await response.json();
+      console.log('DATA', data);
+      if (data.errors) {
+        alert(data.errors[0].message);
+      } else {
+        alert('Update Successful');
+      }
+    } catch (e) {
+      console.log('ERROR', e.message);
+    }
   };
 
   return (
@@ -57,6 +157,7 @@ const ShippingAddressForm = (props: Props) => {
               id="firstName"
               name="first_name"
               value={firstName}
+              onChange={handleFirstNameChange}
             />
           </div>
 
@@ -67,24 +168,50 @@ const ShippingAddressForm = (props: Props) => {
               id="lastname"
               name="last_name"
               value={lastName}
+              onChange={handleLastNameChange}
             />
           </div>
         </div>
 
         <label htmlFor="company">Company</label>
-        <input type="text" id="company" name="company" value={company} />
+        <input
+          type="text"
+          id="company"
+          name="company"
+          value={company}
+          onChange={handleCompanyChange}
+        />
 
         <label htmlFor="address1">Address</label>
-        <input type="text" id="address1" name="address1" value={address1} />
+        <input
+          type="text"
+          id="address1"
+          name="address1"
+          value={address1}
+          onChange={handleAddress1Change}
+        />
 
         <label htmlFor="address2">Apartment, suite, etc.</label>
-        <input type="text" id="address2" name="address2" value={address2} />
+        <input
+          type="text"
+          id="address2"
+          name="address2"
+          value={address2}
+          onChange={handleAddress2Change}
+        />
 
         <div className="grid">
           <div className="grid__item medium-up--one-half">
             <label htmlFor="city">City</label>
-            <input type="text" id="city" name="city" value={city} />
+            <input
+              type="text"
+              id="city"
+              name="city"
+              value={city}
+              onChange={handleCityChange}
+            />
           </div>
+
           <div className="grid__item medium-up--one-half">
             <label htmlFor="Country">Country/Region</label>
             <select
@@ -398,12 +525,46 @@ const ShippingAddressForm = (props: Props) => {
         <div className="grid">
           <div className="grid__item">
             <label htmlFor="zip">Postal/Zip Code</label>
-            <input type="text" id="zip" name="zip]" value={zip} />
+            <input
+              type="text"
+              id="zip"
+              name="zip"
+              value={zip}
+              onChange={handleZipChange}
+            />
           </div>
 
           <div className="grid__item">
             <label htmlFor="phone">Phone</label>
-            <input type="tel" id="phone" name="phone" value={phone} />
+            <input
+              type="tel"
+              id="phone"
+              name="phone"
+              value={phone}
+              onChange={handlePhoneChange}
+            />
+          </div>
+        </div>
+
+        <div className="grid">
+          <div className="grid__item">
+            <button
+              type="button"
+              className="btn btn--small"
+              onClick={updateShippingAddress}
+            >
+              Submit
+            </button>
+          </div>
+
+          <div className="grid__item">
+            <button
+              type="button"
+              className="btn btn--small"
+              onClick={() => console.log('clicked')}
+            >
+              Cancel
+            </button>
           </div>
         </div>
       </form>

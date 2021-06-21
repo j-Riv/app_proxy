@@ -6,7 +6,7 @@ import ShippingAddressForm from './components/ShippingAddressForm';
 
 const App = () => {
   console.log(window.location);
-  const shop_name = 'https://sample-embedded-app-development.myshopify.com';
+  const shopName = 'https://sample-embedded-app-development.myshopify.com';
 
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<any[]>();
@@ -16,15 +16,12 @@ const App = () => {
   const getSubscriptions = async (customerId: string) => {
     try {
       console.log('LETS POST');
-      const response = await fetch(
-        `${shop_name}/apps/app_proxy/subscriptions`,
-        {
-          method: 'POST',
-          body: JSON.stringify({
-            customerId: customerId,
-          }),
-        }
-      );
+      const response = await fetch(`${shopName}/apps/app_proxy/subscriptions`, {
+        method: 'POST',
+        body: JSON.stringify({
+          customerId: customerId,
+        }),
+      });
       console.log('RESPONSE', response);
       const data = await response.json();
       console.log('DATA', data);
@@ -64,7 +61,7 @@ const App = () => {
         status: status,
       });
       const response = await fetch(
-        `${shop_name}/apps/app_proxy/subscription/edit`,
+        `${shopName}/apps/app_proxy/subscription/edit`,
         {
           method: 'POST',
           headers: {
@@ -92,7 +89,7 @@ const App = () => {
   ) => {
     try {
       const response = await fetch(
-        `${shop_name}/apps/app_proxy/subscription/payment`,
+        `${shopName}/apps/app_proxy/subscription/payment`,
         {
           method: 'POST',
           headers: {
@@ -122,6 +119,7 @@ const App = () => {
     <div className="App">
       {updateAddress && customerId && subscription && (
         <ShippingAddressForm
+          shopName={shopName}
           customerId={customerId}
           subscription={subscription}
           setUpdateAddress={setUpdateAddress}
