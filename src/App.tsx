@@ -36,8 +36,8 @@ const App = () => {
     console.log('ON MOUNT');
     const values = queryString.parse(window.location.search);
     console.log('VALUSES', values);
-    if (values.customerId) {
-      const customer = values.customerId as string;
+    if (values.customer_id) {
+      const customer = values.customer_id as string;
       console.log('CUSTOMER', customer);
       setCustomerId(customer);
       getSubscriptions(customer);
