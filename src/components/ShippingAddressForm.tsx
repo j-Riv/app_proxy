@@ -1,19 +1,27 @@
 import React, { useState, useEffect } from 'react';
+import M from 'materialize-css';
 import { Subscription } from '../types/subscription';
 import countries from '../data/countries';
+import { formatSubscriptionId } from '../utils';
 
 interface Props {
   shopName: string;
   customerId: string;
   subscription: Subscription;
-  setUpdateAddress: (value: React.SetStateAction<boolean>) => void;
+  setOpen: (value: React.SetStateAction<boolean>) => void;
+  getSubscriptions: (customerID: string) => Promise<void>;
 }
 
 const ShippingAddressForm = (props: Props) => {
-  const { subscription, shopName } = props;
+  const {
+    customerId,
+    subscription,
+    shopName,
+    setOpen,
+    getSubscriptions,
+  } = props;
+  console.log('SUBSCRIPTION', subscription.id);
   const Countries: { [key: string]: string[][] } = countries;
-  const [viewProvince, setViewProvince] = useState<boolean>(false);
-  // const [selectedCountry, setSelectedCountry] = useState<string>();
   const [provinces, setProvinces] = useState<string[][]>();
   // data
   const address = subscription.deliveryMethod.address;
@@ -24,7 +32,6 @@ const ShippingAddressForm = (props: Props) => {
   const [province, setProvince] = useState<string>(address.province);
   const [country, setCountry] = useState<string>(address.country);
   const [zip, setZip] = useState<string>(address.zip);
-  // const [name, setName] = useState<string>(address.name);
   const [firstName, setFirstName] = useState<string>(address.firstName);
   const [lastName, setLastName] = useState<string>(address.lastName);
   const [phone, setPhone] = useState<string>(address.phone);
@@ -32,11 +39,19 @@ const ShippingAddressForm = (props: Props) => {
   useEffect(() => {
     if (Countries[country]) {
       setProvinces(Countries[country]);
-      setViewProvince(true);
-    } else {
-      setViewProvince(false);
     }
+    const elems = document.querySelectorAll('select');
+    M.FormSelect.init(elems);
   }, []);
+
+  useEffect(() => {
+    const elem = document.querySelector('#province');
+    if (elem) {
+      const instance = M.FormSelect.getInstance(elem);
+      instance.destroy();
+      M.FormSelect.init(elem);
+    }
+  }, [provinces]);
 
   const handleCountryChange = (event: { target: { value: string } }) => {
     const c = event.target.value;
@@ -44,9 +59,8 @@ const ShippingAddressForm = (props: Props) => {
     setCountry(c);
     if (Countries[c]) {
       setProvinces(Countries[c]);
-      setViewProvince(true);
     } else {
-      setViewProvince(false);
+      setProvinces([]);
     }
   };
 
@@ -137,9 +151,13 @@ const ShippingAddressForm = (props: Props) => {
       const data = await response.json();
       console.log('DATA', data);
       if (data.errors) {
-        alert(data.errors[0].message);
+        // alert(data.errors[0].message);
+        M.toast({ html: data.errors[0].message, classes: 'toast-error' });
       } else {
         alert('Update Successful');
+        M.toast({ html: 'Update Successful.' });
+        getSubscriptions(customerId);
+        setOpen(false);
       }
     } catch (e) {
       console.log('ERROR', e.message);
@@ -147,74 +165,133 @@ const ShippingAddressForm = (props: Props) => {
   };
 
   return (
-    <div className="form-vertical">
-      <form method="post" acceptCharset="UTF-8">
-        <h2>Edit address</h2>
-        <div className="grid">
-          <div className="grid__item medium-up--one-half">
-            <label htmlFor="firstName">First Name</label>
+    <div className="row">
+      <form className="col s12" acceptCharset="UTF-8">
+        <h3>
+          Update Address For Subscription (
+          {formatSubscriptionId(subscription.id)})
+        </h3>
+        <div className="row">
+          <div className="input-field col s12 m6">
             <input
+              className="validate"
               type="text"
               id="firstName"
               name="first_name"
               value={firstName}
               onChange={handleFirstNameChange}
+              placeholder="First Name"
             />
+            <label className="active" htmlFor="firstName">
+              First Name
+            </label>
           </div>
 
-          <div className="grid__item medium-up--one-half">
-            <label htmlFor="lastName">Last Name</label>
+          <div className="input-field col s12 m6">
             <input
+              className="validate"
               type="text"
               id="lastname"
               name="last_name"
               value={lastName}
               onChange={handleLastNameChange}
+              placeholder="Last Name"
             />
+            <label className="active" htmlFor="lastName">
+              Last Name
+            </label>
           </div>
         </div>
 
-        <label htmlFor="company">Company</label>
-        <input
-          type="text"
-          id="company"
-          name="company"
-          value={company}
-          onChange={handleCompanyChange}
-        />
-
-        <label htmlFor="address1">Address</label>
-        <input
-          type="text"
-          id="address1"
-          name="address1"
-          value={address1}
-          onChange={handleAddress1Change}
-        />
-
-        <label htmlFor="address2">Apartment, suite, etc.</label>
-        <input
-          type="text"
-          id="address2"
-          name="address2"
-          value={address2}
-          onChange={handleAddress2Change}
-        />
-
-        <div className="grid">
-          <div className="grid__item medium-up--one-half">
-            <label htmlFor="city">City</label>
+        <div className="row">
+          <div className="input-field col s12">
             <input
+              className="validate"
+              type="text"
+              id="company"
+              name="company"
+              value={company}
+              onChange={handleCompanyChange}
+              placeholder="Company"
+            />
+            <label className="active" htmlFor="company">
+              Company
+            </label>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="input-field col s12">
+            <input
+              className="validate"
+              type="text"
+              id="address1"
+              name="address1"
+              value={address1}
+              onChange={handleAddress1Change}
+              placeholder="Address 1"
+            />
+            <label className="active" htmlFor="address1">
+              Address
+            </label>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="input-field col s12">
+            <input
+              className="validate"
+              type="text"
+              id="address2"
+              name="address2"
+              value={address2}
+              onChange={handleAddress2Change}
+              placeholder="Address 2"
+            />
+            <label className="active" htmlFor="address2">
+              Apartment, suite, etc.
+            </label>
+          </div>
+        </div>
+
+        <div className="row">
+          <div className="input-field col s12 m3">
+            <input
+              className="validate"
               type="text"
               id="city"
               name="city"
               value={city}
               onChange={handleCityChange}
+              placeholder="City"
             />
+            <label className="active" htmlFor="city">
+              City
+            </label>
           </div>
 
-          <div className="grid__item medium-up--one-half">
-            <label htmlFor="Country">Country/Region</label>
+          <div id="provinceContainer" className="input-field col s12 m3">
+            <select
+              id="province"
+              name="province"
+              value={province}
+              onChange={handleProvinceChange}
+            >
+              {provinces &&
+                provinces.map((province: string[]) => {
+                  return (
+                    <option key={province[0]} value={province[0]}>
+                      {province[1]}
+                    </option>
+                  );
+                })}
+            </select>
+            <label className="active" htmlFor="province">
+              Province
+            </label>
+          </div>
+
+          <div className="input-field col s12 m3">
             <select
               id="country"
               className="address-country-option"
@@ -499,70 +576,57 @@ const ShippingAddressForm = (props: Props) => {
               <option value="Zambia">Zambia</option>
               <option value="Zimbabwe">Zimbabwe</option>
             </select>
+            <label className="active" htmlFor="Country">
+              Country/Region
+            </label>
           </div>
-        </div>
-
-        {viewProvince && (
-          <div id="provinceContainer">
-            <label htmlFor="province">Province</label>
-            <select
-              id="province"
-              name="province"
-              value={province}
-              onChange={handleProvinceChange}
-            >
-              {provinces &&
-                provinces.map((province: string[]) => {
-                  return (
-                    <option key={province[0]} value={province[0]}>
-                      {province[1]}
-                    </option>
-                  );
-                })}
-            </select>
-          </div>
-        )}
-
-        <div className="grid">
-          <div className="grid__item">
-            <label htmlFor="zip">Postal/Zip Code</label>
+          <div className="input-field col s12 m3">
             <input
+              className="validate"
               type="text"
               id="zip"
               name="zip"
               value={zip}
               onChange={handleZipChange}
             />
+            <label className="active" htmlFor="zip">
+              Postal/Zip Code
+            </label>
           </div>
+        </div>
 
-          <div className="grid__item">
-            <label htmlFor="phone">Phone</label>
+        <div className="row">
+          <div className="input-field col s12">
             <input
+              className="validate"
               type="tel"
               id="phone"
               name="phone"
               value={phone}
               onChange={handlePhoneChange}
+              placeholder="Phone"
             />
+            <label className="active" htmlFor="phone">
+              Phone
+            </label>
           </div>
         </div>
 
-        <div className="grid">
-          <div className="grid__item">
+        <div className="row">
+          <div className="col s6">
             <button
               type="button"
-              className="btn btn--small"
+              className="btn background-s-red"
               onClick={updateShippingAddress}
             >
               Submit
             </button>
           </div>
-
-          <div className="grid__item">
+          <div className="col s6">
             <button
               type="button"
-              className="btn btn--small"
-              onClick={() => console.log('clicked')}
+              className="btn background-s-red"
+              onClick={() => setOpen(false)}
             >
               Cancel
             </button>

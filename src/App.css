@@ -36,3 +36,40 @@
     transform: rotate(360deg);
   }
 }
+
+/* custom */
+.background-s-red {
+  background-color: #822808;
+}
+
+.background-s-red:hover,
+.background-s-red:focus {
+  background-color: #b2370b;
+}
+
+.actions button {
+  margin: 5px;
+}
+
+.toast-error {
+  background-color: #822808;
+}
+
+.subscriptions {
+  text-align: left;
+}
+
+.subscriptions .subscription {
+  margin: 0 20px;
+  padding: 20px;
+}
+
+.subscriptions .subscription:nth-child(odd) {
+  background: rgba(242, 242, 242, 0.5);
+}
+
+@media only screen and (max-width: 480px) {
+  .subscriptions .subscription button.btn-action {
+    width: 100%;
+  }
+}
