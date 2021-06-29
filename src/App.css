@@ -73,3 +73,8 @@
     width: 100%;
   }
 }
+
+.subscription-id {
+  color: #822808;
+  font-weight: 700;
+}

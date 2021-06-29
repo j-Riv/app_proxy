@@ -143,26 +143,25 @@ const App = () => {
                         key={subscription.node.id}
                         className="row subscription"
                       >
-                        <div className="id col s12 m6">
-                          <b>ID: </b>
-                          {formatSubscriptionId(s.id)}
+                        <div className="subscription-id col s12 m6">
+                          #{formatSubscriptionId(s.id)}
                         </div>
-                        <div className="status col s12 m6">
+                        <div className="subscription-status col s12 m6">
                           <b>Status: </b>
                           {s.status}
                         </div>
-                        <div className="billing-policy col s12">
+                        <div className="subscription-billing-policy col s12">
                           <b>Billing Policy: </b> Every{' '}
                           {s.billingPolicy.intervalCount}{' '}
                           {s.billingPolicy.interval.toLowerCase()}
                           (s)
                         </div>
-                        <div className="next-billing-date col s12">
+                        <div className="subscription-next-billing-date col s12">
                           <b>Next Billing Date: </b>
                           {formatDate(s.nextBillingDate)}
                         </div>
 
-                        <div className="col s12">
+                        <div className="subscription-products col s12">
                           <b>Products: </b>
                         </div>
                         {s.lines.edges.map((line: LineNode) => {
