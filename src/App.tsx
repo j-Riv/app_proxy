@@ -23,6 +23,10 @@ const App = () => {
       console.log('LETS POST');
       const response = await fetch(`${shopName}/apps/app_proxy/subscriptions`, {
         method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
           customerId: customerId,
         }),

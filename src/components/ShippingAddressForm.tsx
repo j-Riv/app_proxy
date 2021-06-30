@@ -132,6 +132,10 @@ const ShippingAddressForm = (props: Props) => {
         `${shopName}/apps/app_proxy/subscription/address`,
         {
           method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
           body: JSON.stringify({
             subscriptionContractId: subscription.id,
             address1,
