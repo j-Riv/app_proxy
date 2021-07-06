@@ -155,10 +155,8 @@ const ShippingAddressForm = (props: Props) => {
       const data = await response.json();
       console.log('DATA', data);
       if (data.errors) {
-        // alert(data.errors[0].message);
         M.toast({ html: data.errors[0].message, classes: 'toast-error' });
       } else {
-        alert('Update Successful');
         M.toast({ html: 'Update Successful.' });
         getSubscriptions(customerId);
         setOpen(false);
