@@ -25,21 +25,18 @@ const App = () => {
     customer: string
   ) => {
     try {
-      const response = await fetch(
-        `https://${shopName}/apps/app_proxy/subscriptions`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: accessToken,
-            shop: shopName,
-            customerId: customer,
-          }),
-        }
-      );
+      const response = await fetch(`/apps/app_proxy/subscriptions`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: accessToken,
+          shop: shopName,
+          customerId: customer,
+        }),
+      });
       const data = await response.json();
       setSubscriptions(data);
       setLoading(false);
@@ -49,7 +46,7 @@ const App = () => {
         html: 'ERROR: Failed to get Subscriptions.',
         classes: 'toast-error',
       });
-      accountRedirect();
+      // accountRedirect();
     }
   };
 
@@ -76,23 +73,20 @@ const App = () => {
     status: string
   ) => {
     try {
-      const response = await fetch(
-        `https://${shop}/apps/app_proxy/subscription/edit`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: token,
-            shop: shop,
-            customerId: customerId,
-            subscriptionContractId: subscriptionId,
-            status: status,
-          }),
-        }
-      );
+      const response = await fetch(`/apps/app_proxy/subscription/edit`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          shop: shop,
+          customerId: customerId,
+          subscriptionContractId: subscriptionId,
+          status: status,
+        }),
+      });
       const data = await response.json();
       M.toast({ html: 'Updated Successfully!' });
       if (shop && customerId && token) {
@@ -111,22 +105,19 @@ const App = () => {
     paymentMethodId: string
   ) => {
     try {
-      const response = await fetch(
-        `https://${shop}/apps/app_proxy/subscription/payment`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token: token,
-            shop: shop,
-            customerId: customerId,
-            paymentMethodId: paymentMethodId,
-          }),
-        }
-      );
+      const response = await fetch(`/apps/app_proxy/subscription/payment`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          shop: shop,
+          customerId: customerId,
+          paymentMethodId: paymentMethodId,
+        }),
+      });
       const data = await response.json();
       console.log('UPDATE PAYMENT', data);
       // alert('Payment Method Update Email Sent!');
@@ -167,52 +158,60 @@ const App = () => {
               <h3>Subscriptions</h3>
               <div className="col s12">
                 <div className="subscriptions">
-                  {subscriptions.map((subscription: SubscriptionNode) => {
-                    const s = subscription.node;
-                    return (
-                      <div
-                        key={subscription.node.id}
-                        className="row subscription"
-                      >
-                        <div className="subscription-id col s12 m6">
-                          #{formatSubscriptionId(s.id)}
-                        </div>
-                        <div className="subscription-status col s12 m6">
-                          <b>Status: </b>
-                          {s.status}
-                        </div>
-                        <div className="subscription-billing-policy col s12">
-                          <b>Billing Policy: </b> Every{' '}
-                          {s.billingPolicy.intervalCount}{' '}
-                          {s.billingPolicy.interval.toLowerCase()}
-                          (s)
-                        </div>
-                        <div className="subscription-next-billing-date col s12">
-                          <b>Next Billing Date: </b>
-                          {formatDate(s.nextBillingDate)}
-                        </div>
+                  {subscriptions.length > 0 ? (
+                    subscriptions.map((subscription: SubscriptionNode) => {
+                      const s = subscription.node;
+                      return (
+                        <div
+                          key={subscription.node.id}
+                          className="row subscription"
+                        >
+                          <div className="subscription-id col s12 m6">
+                            #{formatSubscriptionId(s.id)}
+                          </div>
+                          <div className="subscription-status col s12 m6">
+                            <b>Status: </b>
+                            {s.status}
+                          </div>
+                          <div className="subscription-billing-policy col s12">
+                            <b>Billing Policy: </b> Every{' '}
+                            {s.billingPolicy.intervalCount}{' '}
+                            {s.billingPolicy.interval.toLowerCase()}
+                            (s)
+                          </div>
+                          <div className="subscription-next-billing-date col s12">
+                            <b>Next Billing Date: </b>
+                            {formatDate(s.nextBillingDate)}
+                          </div>
 
-                        <div className="subscription-products col s12">
-                          <b>Products: </b>
+                          <div className="subscription-products col s12">
+                            <b>Products: </b>
+                          </div>
+                          {s.lines.edges.map((line: LineNode) => {
+                            const l = line.node;
+                            return (
+                              <div key={line.node.id} className="col s12">
+                                {l.title} - {l.variantTitle} x {l.quantity}
+                              </div>
+                            );
+                          })}
+                          <ActionButtons
+                            customerId={customerId}
+                            subscription={s}
+                            updateStatus={updateStatus}
+                            updatePaymentMethod={updatePaymentMethod}
+                            handleUpdateAddress={handleUpdateAddress}
+                          />
                         </div>
-                        {s.lines.edges.map((line: LineNode) => {
-                          const l = line.node;
-                          return (
-                            <div key={line.node.id} className="col s12">
-                              {l.title} - {l.variantTitle} x {l.quantity}
-                            </div>
-                          );
-                        })}
-                        <ActionButtons
-                          customerId={customerId}
-                          subscription={s}
-                          updateStatus={updateStatus}
-                          updatePaymentMethod={updatePaymentMethod}
-                          handleUpdateAddress={handleUpdateAddress}
-                        />
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    <p style={{ textAlign: 'center' }}>
+                      No Subscriptions Found!
+                      <br />
+                      <a href="/account">Go Back To Account.</a>
+                    </p>
+                  )}
                 </div>
               </div>
             </div>

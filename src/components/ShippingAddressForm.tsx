@@ -134,31 +134,28 @@ const ShippingAddressForm = (props: Props) => {
         })
       );
       console.log('LETS POST');
-      const response = await fetch(
-        `https://${shop}/apps/app_proxy/subscription/address`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            token,
-            customerId,
-            subscriptionContractId: subscription.id,
-            address1,
-            address2,
-            city,
-            province,
-            country,
-            zip,
-            firstName,
-            lastName,
-            company,
-            phone,
-          }),
-        }
-      );
+      const response = await fetch(`/apps/app_proxy/subscription/address`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token,
+          customerId,
+          subscriptionContractId: subscription.id,
+          address1,
+          address2,
+          city,
+          province,
+          country,
+          zip,
+          firstName,
+          lastName,
+          company,
+          phone,
+        }),
+      });
       console.log('UPDATE SHIPPING ADDRESS RESPONSE', response);
       const data = await response.json();
       console.log('DATA', data);
