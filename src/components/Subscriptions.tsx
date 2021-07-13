@@ -7,18 +7,25 @@ import { SubscriptionNode, LineNode } from '../types/subscription';
 const Subscriptions = () => {
   console.log(window.location);
   const shop_name = 'https://sample-embedded-app-development.myshopify.com';
-
-  const [customerId, setCustomerId] = useState<string | null>(null);
+  const [shop, setShop] = useState<string>();
+  const [token, setToken] = useState<string>();
+  const [customerId, setCustomerId] = useState<string>();
   const [subscriptions, setSubscriptions] = useState<SubscriptionNode[]>();
 
-  const getSubscriptions = async (customerId: string) => {
+  const getSubscriptions = async (
+    shop: string,
+    customerId: string,
+    token: string
+  ) => {
     try {
-      console.log('LETS POST');
+      console.log('LETS POST THIS SHIT');
+      // shop_name
       const response = await fetch(
-        `${shop_name}/apps/app_proxy/subscriptions`,
+        `https://${shop}/apps/app_proxy/subscriptions`,
         {
           method: 'POST',
           body: JSON.stringify({
+            token: token,
             customerId: customerId,
           }),
         }
@@ -33,14 +40,20 @@ const Subscriptions = () => {
   };
 
   useEffect(() => {
-    console.log('ON MOUNT');
-    const values = queryString.parse(window.location.search);
-    console.log('VALUSES', values);
-    if (values.customerId) {
-      const customer = values.customerId as string;
+    console.log('ON MOUNT ===>');
+    const params = queryString.parse(window.location.search);
+    console.log('PARAMS', params);
+    if (params.customerId) {
+      const shopName = params.shop as string;
+      const customer = params.customerId as string;
+      const accessToken = params.token as string;
       console.log('CUSTOMER', customer);
-      setCustomerId(customer);
-      getSubscriptions(customer);
+      if (shopName && accessToken && customer) {
+        setShop(shopName);
+        setToken(accessToken);
+        setCustomerId(customer);
+        getSubscriptions(shopName, customer, accessToken);
+      }
     }
   }, []);
 
@@ -70,6 +83,7 @@ const Subscriptions = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            token: token,
             customerId: customerId,
             subscriptionContractId: subscriptionId,
             status: status,
@@ -77,7 +91,9 @@ const Subscriptions = () => {
         }
       );
       const data = await response.json();
-      getSubscriptions(customerId);
+      if (shop && customerId && token) {
+        getSubscriptions(shop, customerId, token);
+      }
       console.log('UPDATE STATUS', data);
     } catch (e) {
       console.log('ERROR', e.message);
@@ -98,6 +114,7 @@ const Subscriptions = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            token: token,
             customerId: customerId,
             paymentMethodId: paymentMethodId,
           }),

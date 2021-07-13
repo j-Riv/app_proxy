@@ -2,21 +2,27 @@ import React, { useState, useEffect } from 'react';
 import M from 'materialize-css';
 import { Subscription } from '../types/subscription';
 import countries from '../data/countries';
-import { formatSubscriptionId } from '../utils';
+import { formatSubscriptionId, accountRedirect } from '../utils';
 
 interface Props {
-  shopName: string;
+  shop: string;
   customerId: string;
+  token: string;
   subscription: Subscription;
   setOpen: (value: React.SetStateAction<boolean>) => void;
-  getSubscriptions: (customerID: string) => Promise<void>;
+  getSubscriptions: (
+    shop: string,
+    token: string,
+    customerId: string
+  ) => Promise<void>;
 }
 
 const ShippingAddressForm = (props: Props) => {
   const {
+    shop,
     customerId,
+    token,
     subscription,
-    shopName,
     setOpen,
     getSubscriptions,
   } = props;
@@ -129,7 +135,7 @@ const ShippingAddressForm = (props: Props) => {
       );
       console.log('LETS POST');
       const response = await fetch(
-        `${shopName}/apps/app_proxy/subscription/address`,
+        `https://${shop}/apps/app_proxy/subscription/address`,
         {
           method: 'POST',
           headers: {
@@ -137,6 +143,8 @@ const ShippingAddressForm = (props: Props) => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            token,
+            customerId,
             subscriptionContractId: subscription.id,
             address1,
             address2,
@@ -158,11 +166,12 @@ const ShippingAddressForm = (props: Props) => {
         M.toast({ html: data.errors[0].message, classes: 'toast-error' });
       } else {
         M.toast({ html: 'Update Successful.' });
-        getSubscriptions(customerId);
+        getSubscriptions(shop, token, customerId);
         setOpen(false);
       }
     } catch (e) {
       console.log('ERROR', e.message);
+      accountRedirect();
     }
   };
 

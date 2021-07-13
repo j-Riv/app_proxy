@@ -3,7 +3,7 @@ import queryString from 'query-string';
 import M from 'materialize-css';
 import 'materialize-css/dist/css/materialize.min.css';
 import './App.css';
-import { formatDate, formatSubscriptionId } from './utils';
+import { formatDate, formatSubscriptionId, accountRedirect } from './utils';
 import { SubscriptionNode, Subscription, LineNode } from './types/subscription';
 import ShippingAddressForm from './components/ShippingAddressForm';
 import ActionButtons from './components/ActionButtons';
@@ -11,26 +11,35 @@ import Loader from './components/Loader';
 
 const App = () => {
   console.log(window.location);
-  const shopName = 'https://sample-embedded-app-development.myshopify.com';
   const [loading, setLoading] = useState<boolean>(true);
+  const [shop, setShop] = useState<string>('');
+  const [token, setToken] = useState<string>('');
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionNode[]>();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [open, setOpen] = useState<boolean>(false);
 
-  const getSubscriptions = async (customerId: string) => {
+  const getSubscriptions = async (
+    shopName: string,
+    accessToken: string,
+    customer: string
+  ) => {
     try {
-      console.log('LETS POST');
-      const response = await fetch(`${shopName}/apps/app_proxy/subscriptions`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          customerId: customerId,
-        }),
-      });
+      const response = await fetch(
+        `https://${shopName}/apps/app_proxy/subscriptions`,
+        {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token: accessToken,
+            shop: shopName,
+            customerId: customer,
+          }),
+        }
+      );
       const data = await response.json();
       setSubscriptions(data);
       setLoading(false);
@@ -40,15 +49,24 @@ const App = () => {
         html: 'ERROR: Failed to get Subscriptions.',
         classes: 'toast-error',
       });
+      accountRedirect();
     }
   };
 
   useEffect(() => {
-    const values = queryString.parse(window.location.search);
-    if (values.customer_id) {
-      const customer = values.customer_id as string;
-      setCustomerId(customer);
-      getSubscriptions(customer);
+    const params = queryString.parse(window.location.search);
+    console.log('PARAMS', params);
+    if (params.customer_id) {
+      const shopName = params.shop as string;
+      const customer = params.customer_id as string;
+      const accessToken = params.token as string;
+      if (shopName && accessToken && customer) {
+        console.log('OK LETS RUN THIS');
+        setShop(shopName);
+        setToken(accessToken);
+        setCustomerId(customer);
+        getSubscriptions(shopName, accessToken, customer);
+      }
     }
   }, []);
 
@@ -59,7 +77,7 @@ const App = () => {
   ) => {
     try {
       const response = await fetch(
-        `${shopName}/apps/app_proxy/subscription/edit`,
+        `https://${shop}/apps/app_proxy/subscription/edit`,
         {
           method: 'POST',
           headers: {
@@ -67,6 +85,8 @@ const App = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            token: token,
+            shop: shop,
             customerId: customerId,
             subscriptionContractId: subscriptionId,
             status: status,
@@ -75,11 +95,14 @@ const App = () => {
       );
       const data = await response.json();
       M.toast({ html: 'Updated Successfully!' });
-      getSubscriptions(customerId);
+      if (shop && customerId && token) {
+        getSubscriptions(shop, token, customerId);
+      }
       console.log('UPDATE STATUS', data);
     } catch (e) {
       console.log('ERROR', e.message);
       M.toast({ html: 'ERROR: Failed to Update.', classes: 'toast-error' });
+      accountRedirect();
     }
   };
 
@@ -89,7 +112,7 @@ const App = () => {
   ) => {
     try {
       const response = await fetch(
-        `${shopName}/apps/app_proxy/subscription/payment`,
+        `https://${shop}/apps/app_proxy/subscription/payment`,
         {
           method: 'POST',
           headers: {
@@ -97,6 +120,8 @@ const App = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
+            token: token,
+            shop: shop,
             customerId: customerId,
             paymentMethodId: paymentMethodId,
           }),
@@ -112,6 +137,7 @@ const App = () => {
         html: 'ERROR: Failed to Send Update Email.',
         classes: 'toast-error',
       });
+      accountRedirect();
     }
   };
 
@@ -128,8 +154,9 @@ const App = () => {
         <>
           {open && customerId && subscription && (
             <ShippingAddressForm
-              shopName={shopName}
+              shop={shop}
               customerId={customerId}
+              token={token}
               subscription={subscription}
               setOpen={setOpen}
               getSubscriptions={getSubscriptions}
