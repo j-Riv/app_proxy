@@ -10,6 +10,9 @@ export interface Subscription {
     interval: string;
   };
   nextBillingDate: string;
+  deliveryPrice: {
+    amount: string;
+  };
   customerPaymentMethod: {
     id: string;
   };
@@ -41,4 +44,16 @@ export interface Line {
   title: string;
   variantTitle: string;
   quantity: string;
+  variantImage: {
+    altText: string;
+    originalSrc: string;
+  };
+  currentPrice: {
+    amount: string;
+  };
+  pricingPolicy: {
+    basePrice: {
+      amount: string;
+    };
+  };
 }

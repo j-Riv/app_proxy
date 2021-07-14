@@ -162,47 +162,76 @@ const App = () => {
                     subscriptions.map((subscription: SubscriptionNode) => {
                       const s = subscription.node;
                       return (
-                        <div
-                          key={subscription.node.id}
-                          className="row subscription"
-                        >
-                          <div className="subscription-id col s12 m6">
-                            #{formatSubscriptionId(s.id)}
-                          </div>
-                          <div className="subscription-status col s12 m6">
-                            <b>Status: </b>
-                            {s.status}
-                          </div>
-                          <div className="subscription-billing-policy col s12">
-                            <b>Billing Policy: </b> Every{' '}
-                            {s.billingPolicy.intervalCount}{' '}
-                            {s.billingPolicy.interval.toLowerCase()}
-                            (s)
-                          </div>
-                          <div className="subscription-next-billing-date col s12">
-                            <b>Next Billing Date: </b>
-                            {formatDate(s.nextBillingDate)}
-                          </div>
-
-                          <div className="subscription-products col s12">
-                            <b>Products: </b>
-                          </div>
-                          {s.lines.edges.map((line: LineNode) => {
-                            const l = line.node;
-                            return (
-                              <div key={line.node.id} className="col s12">
-                                {l.title} - {l.variantTitle} x {l.quantity}
+                        <>
+                          <div
+                            key={subscription.node.id}
+                            className="row section subscription"
+                          >
+                            <div className="subscription-id col s4 m6">
+                              #{formatSubscriptionId(s.id)}
+                            </div>
+                            <div className="subscription-status col s8 m6">
+                              <span className="align-right">
+                                <span className="text-bold">STATUS: </span>
+                                {s.status}
+                              </span>
+                            </div>
+                            <div className="subscription-billing-policy col s12">
+                              <span className="text-bold">DELIVERY: </span>{' '}
+                              Every {s.billingPolicy.intervalCount}{' '}
+                              {s.billingPolicy.interval.toLowerCase()}
+                              (s)
+                            </div>
+                            <div className="subscription-next-billing-date col s12">
+                              <span className="text-bold">
+                                NEXT ORDER DATE:{' '}
+                              </span>
+                              {formatDate(s.nextBillingDate)}
+                            </div>
+                            <div className="subscription-delivery-price col s12">
+                              <span className="text-bold">SHIPPING COST: </span>
+                              ${parseFloat(s.deliveryPrice.amount).toFixed(2)}
+                            </div>
+                            <div className="subscription-products col s12">
+                              <div className="row">
+                                {s.lines.edges.map((line: LineNode) => {
+                                  const l = line.node;
+                                  return (
+                                    <div
+                                      key={line.node.id}
+                                      className="col s6 m3"
+                                    >
+                                      <img
+                                        key={line.node.id}
+                                        src={l.variantImage.originalSrc}
+                                        alt={l.variantImage.altText}
+                                        className="responsive-img"
+                                      />
+                                      <span>
+                                        {l.title}
+                                        {l.variantTitle &&
+                                          ` - ${l.variantTitle}`}
+                                        <br />$
+                                        {parseFloat(
+                                          l.currentPrice.amount
+                                        ).toFixed(2)}{' '}
+                                        x {l.quantity}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
                               </div>
-                            );
-                          })}
-                          <ActionButtons
-                            customerId={customerId}
-                            subscription={s}
-                            updateStatus={updateStatus}
-                            updatePaymentMethod={updatePaymentMethod}
-                            handleUpdateAddress={handleUpdateAddress}
-                          />
-                        </div>
+                            </div>
+                            <ActionButtons
+                              customerId={customerId}
+                              subscription={s}
+                              updateStatus={updateStatus}
+                              updatePaymentMethod={updatePaymentMethod}
+                              handleUpdateAddress={handleUpdateAddress}
+                            />
+                          </div>
+                          <div className="divider"></div>
+                        </>
                       );
                     })
                   ) : (

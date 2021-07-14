@@ -33,9 +33,9 @@ const ActionButtons = (props: Props) => {
 
   if (subscription.status !== 'CANCELLED') {
     return (
-      <>
+      <div className="actions-container">
         <div className="actions col s12">
-          <b>Actions: </b>
+          <span className="text-bold">ACTIONS: </span>
         </div>
         <div className="actions col s12">
           {subscription.status === 'ACTIVE' ? (
@@ -92,7 +92,7 @@ const ActionButtons = (props: Props) => {
             UPDATE SHIP ADDRESS
           </button>
         </div>
-      </>
+      </div>
     );
   }
   return <div className="col s12"></div>;

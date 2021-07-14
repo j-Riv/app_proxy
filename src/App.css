@@ -49,6 +49,7 @@
 
 .actions button {
   margin: 5px;
+  font-weight: 700;
 }
 
 .toast-error {
@@ -59,13 +60,23 @@
   text-align: left;
 }
 
-.subscriptions .subscription {
-  margin: 0 20px;
-  padding: 20px;
+@media only screen and (min-width: 480px) {
+  .subscriptions .subscription {
+    margin: 0 20px;
+    padding: 20px;
+  }
 }
 
-.subscriptions .subscription:nth-child(odd) {
+.subscription-products .row {
+  margin-top: 20px;
+}
+
+.subscriptions .subscription-totals .row:nth-child(odd) {
   background: rgba(242, 242, 242, 0.5);
+}
+
+.subscriptions .subscription-totals .row {
+  margin-bottom: 0;
 }
 
 @media only screen and (max-width: 480px) {
@@ -81,4 +92,39 @@
 
 a {
   color: #822808;
+}
+
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.divider {
+  height: 1px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+}
+
+.text-bold {
+  font-weight: 700;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.align-left {
+  float: left;
+}
+
+.align-right {
+  float: right;
 }
