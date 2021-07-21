@@ -10,7 +10,6 @@ import ActionButtons from './components/ActionButtons';
 import Loader from './components/Loader';
 
 const App = () => {
-  console.log(window.location);
   const [loading, setLoading] = useState<boolean>(true);
   const [shop, setShop] = useState<string>('');
   const [token, setToken] = useState<string>('');
@@ -52,13 +51,11 @@ const App = () => {
 
   useEffect(() => {
     const params = queryString.parse(window.location.search);
-    console.log('PARAMS', params);
     if (params.customer_id) {
       const shopName = params.shop as string;
       const customer = params.customer_id as string;
       const accessToken = params.token as string;
       if (shopName && accessToken && customer) {
-        console.log('OK LETS RUN THIS');
         setShop(shopName);
         setToken(accessToken);
         setCustomerId(customer);
@@ -201,12 +198,14 @@ const App = () => {
                                       key={line.node.id}
                                       className="col s6 m3"
                                     >
-                                      <img
-                                        key={line.node.id}
-                                        src={l.variantImage.originalSrc}
-                                        alt={l.variantImage.altText}
-                                        className="responsive-img"
-                                      />
+                                      {l.variantImage && (
+                                        <img
+                                          key={line.node.id}
+                                          src={l.variantImage.originalSrc}
+                                          alt={l.variantImage.altText}
+                                          className="responsive-img"
+                                        />
+                                      )}
                                       <span>
                                         {l.title}
                                         {l.variantTitle &&

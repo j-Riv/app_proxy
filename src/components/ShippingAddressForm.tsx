@@ -26,7 +26,6 @@ const ShippingAddressForm = (props: Props) => {
     setOpen,
     getSubscriptions,
   } = props;
-  console.log('SUBSCRIPTION', subscription.id);
   const Countries: { [key: string]: string[][] } = countries;
   const [provinces, setProvinces] = useState<string[][]>();
   // data
@@ -61,7 +60,6 @@ const ShippingAddressForm = (props: Props) => {
 
   const handleCountryChange = (event: { target: { value: string } }) => {
     const c = event.target.value;
-    console.log('SETTING COUNTRY', c);
     setCountry(c);
     if (Countries[c]) {
       setProvinces(Countries[c]);
@@ -117,23 +115,6 @@ const ShippingAddressForm = (props: Props) => {
 
   const updateShippingAddress = async () => {
     try {
-      console.log(
-        'UPDATING ADDRESS',
-        JSON.stringify({
-          subscriptionContractId: subscription.id,
-          address1,
-          address2,
-          city,
-          province,
-          country,
-          zip,
-          firstName,
-          lastName,
-          company,
-          phone,
-        })
-      );
-      console.log('LETS POST');
       const response = await fetch(`/apps/app_proxy/subscription/address`, {
         method: 'POST',
         headers: {
@@ -156,9 +137,7 @@ const ShippingAddressForm = (props: Props) => {
           phone,
         }),
       });
-      console.log('UPDATE SHIPPING ADDRESS RESPONSE', response);
       const data = await response.json();
-      console.log('DATA', data);
       if (data.errors) {
         M.toast({ html: data.errors[0].message, classes: 'toast-error' });
       } else {
