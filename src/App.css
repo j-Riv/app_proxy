@@ -36,3 +36,95 @@
     transform: rotate(360deg);
   }
 }
+
+/* custom */
+.background-s-red {
+  background-color: #822808;
+}
+
+.background-s-red:hover,
+.background-s-red:focus {
+  background-color: #b2370b;
+}
+
+.actions button {
+  margin: 5px;
+  font-weight: 700;
+}
+
+.toast-error {
+  background-color: #822808;
+}
+
+.subscriptions {
+  text-align: left;
+}
+
+@media only screen and (min-width: 480px) {
+  .subscriptions .subscription {
+    margin: 0 20px;
+    padding: 20px;
+  }
+}
+
+.subscription-products .row {
+  margin-top: 20px;
+}
+
+.subscriptions .subscription-totals .row:nth-child(odd) {
+  background: rgba(242, 242, 242, 0.5);
+}
+
+.subscriptions .subscription-totals .row {
+  margin-bottom: 0;
+}
+
+@media only screen and (max-width: 480px) {
+  .subscriptions .subscription button.btn-action {
+    width: 100%;
+  }
+}
+
+.subscription-id {
+  color: #822808;
+  font-weight: 700;
+}
+
+a {
+  color: #822808;
+}
+
+.responsive-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.divider {
+  height: 1px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+}
+
+.text-bold {
+  font-weight: 700;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
+
+.align-left {
+  float: left;
+}
+
+.align-right {
+  float: right;
+}

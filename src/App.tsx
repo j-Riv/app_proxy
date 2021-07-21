@@ -1,54 +1,68 @@
 import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
+import M from 'materialize-css';
+import 'materialize-css/dist/css/materialize.min.css';
 import './App.css';
-import { formatDate, formatSubscriptionId } from './utils';
+import { formatDate, formatSubscriptionId, accountRedirect } from './utils';
 import { SubscriptionNode, Subscription, LineNode } from './types/subscription';
 import ShippingAddressForm from './components/ShippingAddressForm';
+import ActionButtons from './components/ActionButtons';
+import Loader from './components/Loader';
 
 const App = () => {
-  console.log(window.location);
-  const shopName = 'https://sample-embedded-app-development.myshopify.com';
-
+  const [loading, setLoading] = useState<boolean>(true);
+  const [shop, setShop] = useState<string>('');
+  const [token, setToken] = useState<string>('');
   const [customerId, setCustomerId] = useState<string | null>(null);
   const [subscriptions, setSubscriptions] = useState<SubscriptionNode[]>();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
-  const [updateAddress, setUpdateAddress] = useState<boolean>(false);
+  const [open, setOpen] = useState<boolean>(false);
 
-  const getSubscriptions = async (customerId: string) => {
+  const getSubscriptions = async (
+    shopName: string,
+    accessToken: string,
+    customer: string
+  ) => {
     try {
-      console.log('LETS POST');
-      const response = await fetch(`${shopName}/apps/app_proxy/subscriptions`, {
+      const response = await fetch(`/apps/app_proxy/subscriptions`, {
         method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
         body: JSON.stringify({
-          customerId: customerId,
+          token: accessToken,
+          shop: shopName,
+          customerId: customer,
         }),
       });
-      console.log('RESPONSE', response);
       const data = await response.json();
-      console.log('DATA', data);
       setSubscriptions(data);
+      setLoading(false);
     } catch (e) {
       console.log('ERROR', e.message);
+      M.toast({
+        html: 'ERROR: Failed to get Subscriptions.',
+        classes: 'toast-error',
+      });
+      // accountRedirect();
     }
   };
 
   useEffect(() => {
-    console.log('ON MOUNT');
-    const values = queryString.parse(window.location.search);
-    console.log('VALUSES', values);
-    if (values.customer_id) {
-      const customer = values.customer_id as string;
-      console.log('CUSTOMER', customer);
-      setCustomerId(customer);
-      getSubscriptions(customer);
+    const params = queryString.parse(window.location.search);
+    if (params.customer_id) {
+      const shopName = params.shop as string;
+      const customer = params.customer_id as string;
+      const accessToken = params.token as string;
+      if (shopName && accessToken && customer) {
+        setShop(shopName);
+        setToken(accessToken);
+        setCustomerId(customer);
+        getSubscriptions(shopName, accessToken, customer);
+      }
     }
   }, []);
-
-  enum Status {
-    ACTIVE = 'ACTIVE',
-    PAUSE = 'PAUSED',
-    CANCEL = 'CANCELLED',
-  }
 
   const updateStatus = async (
     customerId: string,
@@ -56,31 +70,30 @@ const App = () => {
     status: string
   ) => {
     try {
-      console.log('SENDING BODY', {
-        customerId: customerId,
-        subscriptionContractId: subscriptionId,
-        status: status,
+      const response = await fetch(`/apps/app_proxy/subscription/edit`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          shop: shop,
+          customerId: customerId,
+          subscriptionContractId: subscriptionId,
+          status: status,
+        }),
       });
-      const response = await fetch(
-        `${shopName}/apps/app_proxy/subscription/edit`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            customerId: customerId,
-            subscriptionContractId: subscriptionId,
-            status: status,
-          }),
-        }
-      );
       const data = await response.json();
-      getSubscriptions(customerId);
+      M.toast({ html: 'Updated Successfully!' });
+      if (shop && customerId && token) {
+        getSubscriptions(shop, token, customerId);
+      }
       console.log('UPDATE STATUS', data);
     } catch (e) {
       console.log('ERROR', e.message);
+      M.toast({ html: 'ERROR: Failed to Update.', classes: 'toast-error' });
+      accountRedirect();
     }
   };
 
@@ -89,136 +102,149 @@ const App = () => {
     paymentMethodId: string
   ) => {
     try {
-      const response = await fetch(
-        `${shopName}/apps/app_proxy/subscription/payment`,
-        {
-          method: 'POST',
-          headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            customerId: customerId,
-            paymentMethodId: paymentMethodId,
-          }),
-        }
-      );
+      const response = await fetch(`/apps/app_proxy/subscription/payment`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          token: token,
+          shop: shop,
+          customerId: customerId,
+          paymentMethodId: paymentMethodId,
+        }),
+      });
       const data = await response.json();
       console.log('UPDATE PAYMENT', data);
-      alert('Payment Method Update Email Sent!');
+      // alert('Payment Method Update Email Sent!');
+      M.toast({ html: 'Payment Method Update Email Sent.' });
     } catch (e) {
       console.log('ERROR', e.message);
+      M.toast({
+        html: 'ERROR: Failed to Send Update Email.',
+        classes: 'toast-error',
+      });
+      accountRedirect();
     }
   };
 
   const handleUpdateAddress = (subscription: Subscription) => {
     setSubscription(subscription);
-    setUpdateAddress(true);
+    setOpen(true);
   };
 
   return (
-    <div className="App">
-      {updateAddress && customerId && subscription && (
-        <ShippingAddressForm
-          shopName={shopName}
-          customerId={customerId}
-          subscription={subscription}
-          setUpdateAddress={setUpdateAddress}
-        />
-      )}
-
-      {customerId && subscriptions && (
-        <table className="responsive-table">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Status</th>
-              <th scope="col">Billing Policy</th>
-              <th scope="col">Next Billing Date</th>
-              <th scope="col">Products</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {subscriptions.map((subscription: SubscriptionNode) => {
-              console.log('SUBSCRIPTION', subscription);
-              const s = subscription.node;
-              return (
-                <tr key={subscription.node.id}>
-                  <td>{formatSubscriptionId(s.id)}</td>
-                  <td>{s.status}</td>
-                  <td>
-                    {s.billingPolicy.intervalCount}{' '}
-                    {s.billingPolicy.interval.toLowerCase()}
-                    (s)
-                  </td>
-                  <td>{formatDate(s.nextBillingDate)}</td>
-                  <td>
-                    {s.lines.edges.map((line: LineNode) => {
-                      const l = line.node;
+    <div className="App container">
+      {loading ? (
+        <Loader />
+      ) : (
+        <>
+          {open && customerId && subscription && (
+            <ShippingAddressForm
+              shop={shop}
+              customerId={customerId}
+              token={token}
+              subscription={subscription}
+              setOpen={setOpen}
+              getSubscriptions={getSubscriptions}
+            />
+          )}
+          {!open && customerId && subscriptions && (
+            <div className="row">
+              <h3>Subscriptions</h3>
+              <div className="col s12">
+                <div className="subscriptions">
+                  {subscriptions.length > 0 ? (
+                    subscriptions.map((subscription: SubscriptionNode) => {
+                      const s = subscription.node;
                       return (
-                        <span key={line.node.id}>
-                          {l.title} - {l.variantTitle} x {l.quantity}
-                        </span>
+                        <>
+                          <div
+                            key={subscription.node.id}
+                            className="row section subscription"
+                          >
+                            <div className="subscription-id col s4 m6">
+                              #{formatSubscriptionId(s.id)}
+                            </div>
+                            <div className="subscription-status col s8 m6">
+                              <span className="align-right">
+                                <span className="text-bold">STATUS: </span>
+                                {s.status}
+                              </span>
+                            </div>
+                            <div className="subscription-billing-policy col s12">
+                              <span className="text-bold">DELIVERY: </span>{' '}
+                              Every {s.billingPolicy.intervalCount}{' '}
+                              {s.billingPolicy.interval.toLowerCase()}
+                              (s)
+                            </div>
+                            <div className="subscription-next-billing-date col s12">
+                              <span className="text-bold">
+                                NEXT ORDER DATE:{' '}
+                              </span>
+                              {formatDate(s.nextBillingDate)}
+                            </div>
+                            <div className="subscription-delivery-price col s12">
+                              <span className="text-bold">SHIPPING COST: </span>
+                              ${parseFloat(s.deliveryPrice.amount).toFixed(2)}
+                            </div>
+                            <div className="subscription-products col s12">
+                              <div className="row">
+                                {s.lines.edges.map((line: LineNode) => {
+                                  const l = line.node;
+                                  return (
+                                    <div
+                                      key={line.node.id}
+                                      className="col s6 m3"
+                                    >
+                                      {l.variantImage && (
+                                        <img
+                                          key={line.node.id}
+                                          src={l.variantImage.originalSrc}
+                                          alt={l.variantImage.altText}
+                                          className="responsive-img"
+                                        />
+                                      )}
+                                      <span>
+                                        {l.title}
+                                        {l.variantTitle &&
+                                          ` - ${l.variantTitle}`}
+                                        <br />$
+                                        {parseFloat(
+                                          l.currentPrice.amount
+                                        ).toFixed(2)}{' '}
+                                        x {l.quantity}
+                                      </span>
+                                    </div>
+                                  );
+                                })}
+                              </div>
+                            </div>
+                            <ActionButtons
+                              customerId={customerId}
+                              subscription={s}
+                              updateStatus={updateStatus}
+                              updatePaymentMethod={updatePaymentMethod}
+                              handleUpdateAddress={handleUpdateAddress}
+                            />
+                          </div>
+                          <div className="divider"></div>
+                        </>
                       );
-                    })}
-                  </td>
-                  <td>
-                    {s.status === 'ACTIVE' ? (
-                      <button
-                        className="btn btn--small"
-                        type="button"
-                        onClick={() =>
-                          updateStatus(customerId, s.id, Status.PAUSE)
-                        }
-                      >
-                        PAUSE
-                      </button>
-                    ) : (
-                      <button
-                        className="btn btn--small"
-                        type="button"
-                        onClick={() =>
-                          updateStatus(customerId, s.id, Status.ACTIVE)
-                        }
-                      >
-                        Activate
-                      </button>
-                    )}
-                    <button
-                      className="btn btn--small"
-                      type="button"
-                      onClick={() =>
-                        updateStatus(customerId, s.id, Status.CANCEL)
-                      }
-                    >
-                      CANCEL
-                    </button>
-                    <button
-                      className="btn btn--small"
-                      type="button"
-                      onClick={() =>
-                        updatePaymentMethod(
-                          customerId,
-                          s.customerPaymentMethod.id
-                        )
-                      }
-                    >
-                      UPDATE PAYMENT METHOD
-                    </button>
-                    <button
-                      className="btn btn--small"
-                      type="button"
-                      onClick={() => handleUpdateAddress(s)}
-                    >
-                      UPDATE SHIP ADDRESS
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                    })
+                  ) : (
+                    <p style={{ textAlign: 'center' }}>
+                      No Subscriptions Found!
+                      <br />
+                      <a href="/account">Go Back To Account.</a>
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
