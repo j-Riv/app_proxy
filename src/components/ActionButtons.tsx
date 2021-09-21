@@ -1,5 +1,4 @@
 import React from 'react';
-import styled from 'styled-components';
 import { Subscription } from '../types/subscription';
 
 interface Props {
