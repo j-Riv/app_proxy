@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import queryString from 'query-string';
-import M from 'materialize-css';
-import 'materialize-css/dist/css/materialize.min.css';
+import styled from 'styled-components';
 import './App.css';
 import { formatDate, formatSubscriptionId, accountRedirect } from './utils';
 import { SubscriptionNode, Subscription, LineNode } from './types/subscription';
 import ShippingAddressForm from './components/ShippingAddressForm';
 import ActionButtons from './components/ActionButtons';
 import Loader from './components/Loader';
+import Toast from './components/Toast';
 
 const App = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -17,6 +17,10 @@ const App = () => {
   const [subscriptions, setSubscriptions] = useState<SubscriptionNode[]>();
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const [open, setOpen] = useState<boolean>(false);
+  // toast
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [isToastError, setIsToastError] = useState<boolean>(false);
+  const [toastMsg, setToastMsg] = useState<string>('');
 
   const getSubscriptions = async (
     shopName: string,
@@ -39,13 +43,13 @@ const App = () => {
       const data = await response.json();
       setSubscriptions(data);
       setLoading(false);
-    } catch (e) {
+    } catch (e: any) {
       console.log('ERROR', e.message);
-      M.toast({
-        html: 'ERROR: Failed to get Subscriptions.',
-        classes: 'toast-error',
-      });
-      // accountRedirect();
+      setIsToastError(true);
+      setToastMsg('ERROR, Failed to get Subscriptions.');
+      setShowToast(true);
+      handleHideToast();
+      accountRedirect();
     }
   };
 
@@ -85,14 +89,20 @@ const App = () => {
         }),
       });
       const data = await response.json();
-      M.toast({ html: 'Updated Successfully!' });
+      setIsToastError(false);
+      setToastMsg('Updated Successfully!');
+      setShowToast(true);
+      handleHideToast();
       if (shop && customerId && token) {
         getSubscriptions(shop, token, customerId);
       }
       console.log('UPDATE STATUS', data);
-    } catch (e) {
+    } catch (e: any) {
       console.log('ERROR', e.message);
-      M.toast({ html: 'ERROR: Failed to Update.', classes: 'toast-error' });
+      setIsToastError(true);
+      setToastMsg('ERROR, Failed to Update.');
+      setShowToast(true);
+      handleHideToast();
       accountRedirect();
     }
   };
@@ -117,14 +127,16 @@ const App = () => {
       });
       const data = await response.json();
       console.log('UPDATE PAYMENT', data);
-      // alert('Payment Method Update Email Sent!');
-      M.toast({ html: 'Payment Method Update Email Sent.' });
-    } catch (e) {
+      setIsToastError(false);
+      setToastMsg('Payment Method Update Email Sent.');
+      setShowToast(true);
+      handleHideToast();
+    } catch (e: any) {
       console.log('ERROR', e.message);
-      M.toast({
-        html: 'ERROR: Failed to Send Update Email.',
-        classes: 'toast-error',
-      });
+      setIsToastError(true);
+      setToastMsg('ERROR, Failed to Send Update Email.');
+      setShowToast(true);
+      handleHideToast();
       accountRedirect();
     }
   };
@@ -134,8 +146,16 @@ const App = () => {
     setOpen(true);
   };
 
+  const handleHideToast = () => {
+    setTimeout(() => {
+      setIsToastError(false);
+      setToastMsg('');
+      setShowToast(false);
+    }, 3000);
+  };
+
   return (
-    <div className="App container">
+    <div className="App container page-width">
       {loading ? (
         <Loader />
       ) : (
@@ -151,53 +171,52 @@ const App = () => {
             />
           )}
           {!open && customerId && subscriptions && (
-            <div className="row">
+            <div>
               <h3>Subscriptions</h3>
-              <div className="col s12">
+              <div className="subscriptions-container">
                 <div className="subscriptions">
                   {subscriptions.length > 0 ? (
                     subscriptions.map((subscription: SubscriptionNode) => {
                       const s = subscription.node;
                       return (
                         <>
-                          <div
+                          <SubscriptionContainer
                             key={subscription.node.id}
-                            className="row section subscription"
+                            className="section subscription"
                           >
-                            <div className="subscription-id col s4 m6">
-                              #{formatSubscriptionId(s.id)}
-                            </div>
-                            <div className="subscription-status col s8 m6">
-                              <span className="align-right">
-                                <span className="text-bold">STATUS: </span>
-                                {s.status}
-                              </span>
-                            </div>
-                            <div className="subscription-billing-policy col s12">
+                            <GridTwoColumn>
+                              <div className="subscription-id">
+                                #{formatSubscriptionId(s.id)}
+                              </div>
+                              <div className="subscription-status">
+                                <span className="align-right">
+                                  <span className="text-bold">STATUS: </span>
+                                  {s.status}
+                                </span>
+                              </div>
+                            </GridTwoColumn>
+                            <div className="subscription-billing-policy">
                               <span className="text-bold">DELIVERY: </span>{' '}
                               Every {s.billingPolicy.intervalCount}{' '}
                               {s.billingPolicy.interval.toLowerCase()}
                               (s)
                             </div>
-                            <div className="subscription-next-billing-date col s12">
+                            <div className="subscription-next-billing-date">
                               <span className="text-bold">
                                 NEXT ORDER DATE:{' '}
                               </span>
                               {formatDate(s.nextBillingDate)}
                             </div>
-                            <div className="subscription-delivery-price col s12">
+                            <div className="subscription-delivery-price">
                               <span className="text-bold">SHIPPING COST: </span>
                               ${parseFloat(s.deliveryPrice.amount).toFixed(2)}
                             </div>
-                            <div className="subscription-products col s12">
-                              <div className="row">
+                            <SubscriptionProducts>
+                              <div className="grid-container">
                                 {s.lines.edges.map((line: LineNode) => {
                                   const l = line.node;
                                   return (
-                                    <div
-                                      key={line.node.id}
-                                      className="col s6 m3"
-                                    >
+                                    <div key={line.node.id} className="product">
                                       {l.variantImage && (
                                         <img
                                           key={line.node.id}
@@ -220,7 +239,7 @@ const App = () => {
                                   );
                                 })}
                               </div>
-                            </div>
+                            </SubscriptionProducts>
                             <ActionButtons
                               customerId={customerId}
                               subscription={s}
@@ -228,7 +247,7 @@ const App = () => {
                               updatePaymentMethod={updatePaymentMethod}
                               handleUpdateAddress={handleUpdateAddress}
                             />
-                          </div>
+                          </SubscriptionContainer>
                           <div className="divider"></div>
                         </>
                       );
@@ -246,8 +265,35 @@ const App = () => {
           )}
         </>
       )}
+      <Toast show={showToast} isError={isToastError} toastMsg={toastMsg} />
     </div>
   );
 };
+
+const SubscriptionProducts = styled.div`
+  .grid-container {
+    display: grid;
+    grid-gap: 1em;
+    grid-template-columns: repeat(4, 1fr);
+    @media only screen and (max-width: 768px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media only screen and (max-width: 468px) {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
+`;
+
+const SubscriptionContainer = styled.div`
+  display: grid;
+  grid-template-columns: repeat(1, fr);
+  grid-gap: 1em;
+`;
+
+const GridTwoColumn = styled.div`
+  display: grid;
+  grid-gap: 1em;
+  grid-template-columns: repeat(2, 1fr);
+`;
 
 export default App;

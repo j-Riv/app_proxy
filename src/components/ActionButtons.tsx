@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { Subscription } from '../types/subscription';
 
 interface Props {
@@ -34,13 +35,13 @@ const ActionButtons = (props: Props) => {
   if (subscription.status !== 'CANCELLED') {
     return (
       <div className="actions-container">
-        <div className="actions col s12">
+        <div className="actions">
           <span className="text-bold">ACTIONS: </span>
         </div>
-        <div className="actions col s12">
+        <div className="actions">
           {subscription.status === 'ACTIVE' ? (
             <button
-              className="btn btn--small waves-effect waves-light background-s-red btn-action"
+              className="btn btn--small btn-action"
               type="button"
               onClick={() =>
                 updateStatus(customerId, subscription.id, Status.PAUSE)
@@ -51,7 +52,7 @@ const ActionButtons = (props: Props) => {
           ) : (
             subscription.status !== 'CANCELLED' && (
               <button
-                className="btn btn--small waves-effect waves-light background-s-red btn-action"
+                className="btn btn--small btn-action"
                 type="button"
                 onClick={() =>
                   updateStatus(customerId, subscription.id, Status.ACTIVE)
@@ -63,7 +64,7 @@ const ActionButtons = (props: Props) => {
           )}
           {subscription.status !== 'CANCELLED' && (
             <button
-              className="btn btn--small waves-effect waves-light background-s-red btn-action"
+              className="btn btn--small btn-action"
               type="button"
               onClick={() =>
                 updateStatus(customerId, subscription.id, Status.CANCEL)
@@ -73,7 +74,7 @@ const ActionButtons = (props: Props) => {
             </button>
           )}
           <button
-            className="btn btn--small waves-effect waves-light background-s-red btn-action"
+            className="btn btn--small btn-action"
             type="button"
             onClick={() =>
               updatePaymentMethod(
@@ -85,7 +86,7 @@ const ActionButtons = (props: Props) => {
             UPDATE PAYMENT METHOD
           </button>
           <button
-            className="btn btn--small waves-effect waves-light background-s-red btn-action"
+            className="btn btn--small btn-action"
             type="button"
             onClick={() => handleUpdateAddress(subscription)}
           >
@@ -95,7 +96,7 @@ const ActionButtons = (props: Props) => {
       </div>
     );
   }
-  return <div className="col s12"></div>;
+  return <div></div>;
 };
 
 export default ActionButtons;

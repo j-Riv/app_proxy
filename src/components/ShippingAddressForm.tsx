@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import M from 'materialize-css';
+import React, { useState, useEffect, createRef } from 'react';
+import styled from 'styled-components';
 import { Subscription } from '../types/subscription';
 import countries from '../data/countries';
 import { formatSubscriptionId, accountRedirect } from '../utils';
+import Toast from '../components/Toast';
 
 interface Props {
   shop: string;
@@ -40,23 +41,16 @@ const ShippingAddressForm = (props: Props) => {
   const [firstName, setFirstName] = useState<string>(address.firstName);
   const [lastName, setLastName] = useState<string>(address.lastName);
   const [phone, setPhone] = useState<string>(address.phone);
+  // toast
+  const [showToast, setShowToast] = useState<boolean>(false);
+  const [isToastError, setIsToastError] = useState<boolean>(false);
+  const [toastMsg, setToastMsg] = useState<string>('');
 
   useEffect(() => {
     if (Countries[country]) {
       setProvinces(Countries[country]);
     }
-    const elems = document.querySelectorAll('select');
-    M.FormSelect.init(elems);
   }, []);
-
-  useEffect(() => {
-    const elem = document.querySelector('#province');
-    if (elem) {
-      const instance = M.FormSelect.getInstance(elem);
-      instance.destroy();
-      M.FormSelect.init(elem);
-    }
-  }, [provinces]);
 
   const handleCountryChange = (event: { target: { value: string } }) => {
     const c = event.target.value;
@@ -113,53 +107,78 @@ const ShippingAddressForm = (props: Props) => {
     setPhone(phone);
   };
 
+  const handleHideToast = () => {
+    setTimeout(() => {
+      setIsToastError(false);
+      setToastMsg('');
+      setShowToast(false);
+    }, 3000);
+  };
+
+  const form = createRef<HTMLFormElement>();
+
+  const validate = () => {
+    return form?.current?.reportValidity();
+  };
+
   const updateShippingAddress = async () => {
-    try {
-      const response = await fetch(`/apps/app_proxy/subscription/address`, {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          token,
-          customerId,
-          subscriptionContractId: subscription.id,
-          address1,
-          address2,
-          city,
-          province,
-          country,
-          zip,
-          firstName,
-          lastName,
-          company,
-          phone,
-        }),
-      });
-      const data = await response.json();
-      if (data.errors) {
-        M.toast({ html: data.errors[0].message, classes: 'toast-error' });
-      } else {
-        M.toast({ html: 'Update Successful.' });
-        getSubscriptions(shop, token, customerId);
-        setOpen(false);
+    if (validate()) {
+      try {
+        const response = await fetch(`/apps/app_proxy/subscription/address`, {
+          method: 'POST',
+          headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            token,
+            customerId,
+            subscriptionContractId: subscription.id,
+            address1,
+            address2,
+            city,
+            province,
+            country,
+            zip,
+            firstName,
+            lastName,
+            company,
+            phone,
+          }),
+        });
+        const data = await response.json();
+        if (data.errors) {
+          setIsToastError(true);
+          setToastMsg(data.errors[0].message);
+          setShowToast(true);
+          handleHideToast();
+        } else {
+          setIsToastError(false);
+          setToastMsg('Update Successful.');
+          setShowToast(true);
+          handleHideToast();
+          getSubscriptions(shop, token, customerId);
+          setOpen(false);
+        }
+      } catch (e: any) {
+        console.log('ERROR', e.message);
+        accountRedirect();
       }
-    } catch (e) {
-      console.log('ERROR', e.message);
-      accountRedirect();
     }
   };
 
   return (
-    <div className="row">
-      <form className="col s12" acceptCharset="UTF-8">
+    <Container className="page-width">
+      <form acceptCharset="UTF-8" onSubmit={e => e.preventDefault()} ref={form}>
         <h3>
           Update Address For Subscription (
           {formatSubscriptionId(subscription.id)})
         </h3>
-        <div className="row">
-          <div className="input-field col s12 m6">
+        <GridTwoColumn>
+          <div className="input-field">
+            <label className="active" htmlFor="firstName">
+              First Name
+            </label>
             <input
               className="validate"
               type="text"
@@ -169,12 +188,12 @@ const ShippingAddressForm = (props: Props) => {
               onChange={handleFirstNameChange}
               placeholder="First Name"
             />
-            <label className="active" htmlFor="firstName">
-              First Name
-            </label>
           </div>
 
-          <div className="input-field col s12 m6">
+          <div className="input-field">
+            <label className="active" htmlFor="lastName">
+              Last Name
+            </label>
             <input
               className="validate"
               type="text"
@@ -184,80 +203,74 @@ const ShippingAddressForm = (props: Props) => {
               onChange={handleLastNameChange}
               placeholder="Last Name"
             />
-            <label className="active" htmlFor="lastName">
-              Last Name
-            </label>
           </div>
+        </GridTwoColumn>
+
+        <div className="input-field">
+          <label className="active" htmlFor="company">
+            Company
+          </label>
+          <input
+            className="validate"
+            type="text"
+            id="company"
+            name="company"
+            value={company}
+            onChange={handleCompanyChange}
+            placeholder="Company"
+          />
         </div>
 
-        <div className="row">
-          <div className="input-field col s12">
-            <input
-              className="validate"
-              type="text"
-              id="company"
-              name="company"
-              value={company}
-              onChange={handleCompanyChange}
-              placeholder="Company"
-            />
-            <label className="active" htmlFor="company">
-              Company
-            </label>
-          </div>
+        <div className="input-field">
+          <label className="active" htmlFor="address1">
+            Address
+          </label>
+          <input
+            className="validate"
+            type="text"
+            id="address1"
+            name="address1"
+            value={address1}
+            onChange={handleAddress1Change}
+            placeholder="Address 1"
+          />
         </div>
 
-        <div className="row">
-          <div className="input-field col s12">
-            <input
-              className="validate"
-              type="text"
-              id="address1"
-              name="address1"
-              value={address1}
-              onChange={handleAddress1Change}
-              placeholder="Address 1"
-            />
-            <label className="active" htmlFor="address1">
-              Address
-            </label>
-          </div>
+        <div className="input-field">
+          <label className="active" htmlFor="address2">
+            Apartment, suite, etc.
+          </label>
+          <input
+            className="validate"
+            type="text"
+            id="address2"
+            name="address2"
+            value={address2}
+            onChange={handleAddress2Change}
+            placeholder="Address 2"
+          />
         </div>
 
-        <div className="row">
-          <div className="input-field col s12">
-            <input
-              className="validate"
-              type="text"
-              id="address2"
-              name="address2"
-              value={address2}
-              onChange={handleAddress2Change}
-              placeholder="Address 2"
-            />
-            <label className="active" htmlFor="address2">
-              Apartment, suite, etc.
-            </label>
-          </div>
+        <div className="input-field">
+          <label className="active" htmlFor="city">
+            City
+          </label>
+          <input
+            className="validate"
+            type="text"
+            id="city"
+            name="city"
+            value={city}
+            onChange={handleCityChange}
+            placeholder="City"
+          />
         </div>
 
-        <div className="row">
-          <div className="input-field col s12 m3">
-            <input
-              className="validate"
-              type="text"
-              id="city"
-              name="city"
-              value={city}
-              onChange={handleCityChange}
-              placeholder="City"
-            />
-            <label className="active" htmlFor="city">
-              City
+        <GridThreeColumn>
+          <div id="provinceContainer" className="input-field">
+            <label className="active" htmlFor="province">
+              Province
             </label>
-          </div>
-
-          <div id="provinceContainer" className="input-field col s12 m3">
             <select
               id="province"
               name="province"
@@ -273,12 +286,12 @@ const ShippingAddressForm = (props: Props) => {
                   );
                 })}
             </select>
-            <label className="active" htmlFor="province">
-              Province
-            </label>
           </div>
 
-          <div className="input-field col s12 m3">
+          <div className="input-field">
+            <label className="active" htmlFor="Country">
+              Country/Region
+            </label>
             <select
               id="country"
               className="address-country-option"
@@ -563,11 +576,11 @@ const ShippingAddressForm = (props: Props) => {
               <option value="Zambia">Zambia</option>
               <option value="Zimbabwe">Zimbabwe</option>
             </select>
-            <label className="active" htmlFor="Country">
-              Country/Region
-            </label>
           </div>
-          <div className="input-field col s12 m3">
+          <div className="input-field">
+            <label className="active" htmlFor="zip">
+              Postal/Zip Code
+            </label>
             <input
               className="validate"
               type="text"
@@ -575,53 +588,74 @@ const ShippingAddressForm = (props: Props) => {
               name="zip"
               value={zip}
               onChange={handleZipChange}
+              pattern="\d*"
             />
-            <label className="active" htmlFor="zip">
-              Postal/Zip Code
-            </label>
           </div>
-        </div>
+        </GridThreeColumn>
 
-        <div className="row">
-          <div className="input-field col s12">
-            <input
-              className="validate"
-              type="tel"
-              id="phone"
-              name="phone"
-              value={phone}
-              onChange={handlePhoneChange}
-              placeholder="Phone"
-            />
-            <label className="active" htmlFor="phone">
-              Phone
-            </label>
-          </div>
+        <div className="input-field">
+          <label className="active" htmlFor="phone">
+            Phone
+          </label>
+          <input
+            className="validate"
+            type="tel"
+            id="phone"
+            name="phone"
+            value={phone}
+            onChange={handlePhoneChange}
+            placeholder="Phone"
+            pattern="\d*"
+          />
         </div>
+        <Actions>
+          <button type="submit" className="btn" onClick={updateShippingAddress}>
+            Submit
+          </button>
 
-        <div className="row">
-          <div className="col s6">
-            <button
-              type="button"
-              className="btn background-s-red"
-              onClick={updateShippingAddress}
-            >
-              Submit
-            </button>
-          </div>
-          <div className="col s6">
-            <button
-              type="button"
-              className="btn background-s-red"
-              onClick={() => setOpen(false)}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
+          <button type="button" className="btn" onClick={() => setOpen(false)}>
+            Cancel
+          </button>
+        </Actions>
       </form>
-    </div>
+      <Toast show={showToast} isError={isToastError} toastMsg={toastMsg} />
+    </Container>
   );
 };
+
+const Container = styled.div`
+  input,
+  select {
+    width: 100%;
+  }
+  .input-field {
+    margin: 1em 0;
+  }
+`;
+
+const GridTwoColumn = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 1em;
+  @media only screen and (max-width: 468px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+`;
+
+const GridThreeColumn = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 1em;
+  @media only screen and (max-width: 468px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+`;
+
+const Actions = styled.div`
+  display: grid;
+  grid-gap: 1em;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 2em;
+`;
 
 export default ShippingAddressForm;

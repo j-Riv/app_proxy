@@ -1,5 +1,6 @@
 .App {
   text-align: center;
+  color: #000;
 }
 
 .App-logo {
@@ -103,10 +104,16 @@ a {
   height: 1px;
   overflow: hidden;
   background-color: #e0e0e0;
+  margin: 2em 0;
+}
+
+.divider:last-of-type {
+  display: none;
 }
 
 .text-bold {
   font-weight: 700;
+  color: #822808;
 }
 
 .text-center {
@@ -127,4 +134,25 @@ a {
 
 .align-right {
   float: right;
+}
+
+/* Fix Position */
+#PageContainer {
+  --webkit-transform: none;
+  transform: none;
+}
+
+.App .grid__item {
+  padding: 15px;
+}
+
+.App .grid__item input,
+.App .grid__item select {
+  width: 100%;
+}
+
+@media only screen and (max-width: 749px) {
+  .App .grid {
+    margin-left: 0;
+  }
 }
