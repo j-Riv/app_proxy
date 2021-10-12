@@ -93,10 +93,11 @@ const App = () => {
       setToastMsg('Updated Successfully!');
       setShowToast(true);
       handleHideToast();
-      if (shop && customerId && token) {
-        getSubscriptions(shop, token, customerId);
+      if (data.updatedSubscriptionContractId) {
+        if (shop && customerId && token) {
+          getSubscriptions(shop, token, customerId);
+        }
       }
-      console.log('UPDATE STATUS', data);
     } catch (e: any) {
       console.log('ERROR', e.message);
       setIsToastError(true);
@@ -126,11 +127,12 @@ const App = () => {
         }),
       });
       const data = await response.json();
-      console.log('UPDATE PAYMENT', data);
-      setIsToastError(false);
-      setToastMsg('Payment Method Update Email Sent.');
-      setShowToast(true);
-      handleHideToast();
+      if (data.customerId) {
+        setIsToastError(false);
+        setToastMsg('Payment Method Update Email Sent.');
+        setShowToast(true);
+        handleHideToast();
+      }
     } catch (e: any) {
       console.log('ERROR', e.message);
       setIsToastError(true);
