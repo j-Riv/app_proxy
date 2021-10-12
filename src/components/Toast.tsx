@@ -30,9 +30,9 @@ const Snackbar = styled.div`
   position: fixed; /* Sit on top of the screen */
   z-index: 1; /* Add a z-index if needed */
   left: 50%; /* Center the snackbar */
-  bottom: 50px; /* 50px from the bottom */
+  bottom: 200px; /* 50px from the bottom */
   &.toast-error {
-    background: #bc360a;
+    background: #802a19;
   }
 `;
 

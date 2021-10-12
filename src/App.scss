@@ -1,0 +1,106 @@
+/*================ #Basic Styles ================*/
+:root {
+  --red: #802a19;
+  --red-focus: #551c11;
+}
+/* Fix Position */
+#PageContainer {
+  --webkit-transform: none;
+  transform: none;
+}
+.App {
+  text-align: center;
+  color: #000;
+  .background-s-red {
+    background-color: var(--red);
+    &:hover,
+    &:focus {
+      background-color: var(--red-focus);
+    }
+  }
+  .actions {
+    button {
+      margin: 5px;
+      font-weight: 700;
+      @media only screen and (max-width: 468px) {
+        margin: 5px 0;
+      }
+    }
+  }
+  .toast-error {
+    background-color: var(--red);
+  }
+  a {
+    color: var(--red);
+  }
+  .responsive-img {
+    max-width: 100%;
+    height: auto;
+  }
+  .divider {
+    height: 1px;
+    overflow: hidden;
+    background-color: #e0e0e0;
+    margin: 2em 0;
+    &:last-of-type {
+      display: none;
+    }
+  }
+  /* helpers */
+  .text-bold {
+    font-weight: 700;
+    color: var(--red);
+  }
+  .text-center {
+    text-align: center;
+  }
+  .text-left {
+    text-align: left;
+  }
+  .text-right {
+    text-align: right;
+  }
+  .align-left {
+    float: left;
+  }
+  .align-right {
+    float: right;
+  }
+  .page-width {
+    *zoom: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-left: 55px;
+    padding-right: 55px;
+    @media only screen and (max-width: 749px) {
+      padding-left: 22px;
+      padding-right: 22px;
+    }
+    &::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+  }
+  /* subscriptions */
+  .subscriptions {
+    text-align: left;
+    .subscription {
+      @media only screen and (min-width: 480px) {
+        margin: 0 20px;
+        padding: 20px;
+      }
+      @media only screen and (max-width: 480px) {
+        button {
+          &.btn-action {
+            width: 100%;
+          }
+        }
+      }
+      .subscription-id {
+        color: var(--red);
+        font-weight: 700;
+      }
+    }
+  }
+}
