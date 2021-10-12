@@ -1,130 +1,129 @@
+/*================ #Basic Styles ================*/
+:root {
+  --red: #802a19;
+  --red-focus: #551c11;
+}
+
+/* Fix Position */
+#PageContainer {
+  --webkit-transform: none;
+  transform: none;
+}
+
 .App {
   text-align: center;
+  color: #000;
+  /* helpers */
+  /* subscriptions */
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.App .background-s-red {
+  background-color: var(--red);
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+.App .background-s-red:hover, .App .background-s-red:focus {
+  background-color: var(--red-focus);
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
-}
-
-.App-link {
-  color: #61dafb;
-}
-
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* custom */
-.background-s-red {
-  background-color: #822808;
-}
-
-.background-s-red:hover,
-.background-s-red:focus {
-  background-color: #b2370b;
-}
-
-.actions button {
+.App .actions button {
   margin: 5px;
   font-weight: 700;
 }
 
-.toast-error {
-  background-color: #822808;
+@media only screen and (max-width: 468px) {
+  .App .actions button {
+    margin: 5px 0;
+  }
 }
 
-.subscriptions {
+.App .toast-error {
+  background-color: var(--red);
+}
+
+.App a {
+  color: var(--red);
+}
+
+.App .responsive-img {
+  max-width: 100%;
+  height: auto;
+}
+
+.App .divider {
+  height: 1px;
+  overflow: hidden;
+  background-color: #e0e0e0;
+  margin: 2em 0;
+}
+
+.App .divider:last-of-type {
+  display: none;
+}
+
+.App .text-bold {
+  font-weight: 700;
+  color: var(--red);
+}
+
+.App .text-center {
+  text-align: center;
+}
+
+.App .text-left {
+  text-align: left;
+}
+
+.App .text-right {
+  text-align: right;
+}
+
+.App .align-left {
+  float: left;
+}
+
+.App .align-right {
+  float: right;
+}
+
+.App .page-width {
+  *zoom: 1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 55px;
+  padding-right: 55px;
+}
+
+@media only screen and (max-width: 749px) {
+  .App .page-width {
+    padding-left: 22px;
+    padding-right: 22px;
+  }
+}
+
+.App .page-width::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.App .subscriptions {
   text-align: left;
 }
 
 @media only screen and (min-width: 480px) {
-  .subscriptions .subscription {
+  .App .subscriptions .subscription {
     margin: 0 20px;
     padding: 20px;
   }
 }
 
-.subscription-products .row {
-  margin-top: 20px;
-}
-
-.subscriptions .subscription-totals .row:nth-child(odd) {
-  background: rgba(242, 242, 242, 0.5);
-}
-
-.subscriptions .subscription-totals .row {
-  margin-bottom: 0;
-}
-
 @media only screen and (max-width: 480px) {
-  .subscriptions .subscription button.btn-action {
+  .App .subscriptions .subscription button.btn-action {
     width: 100%;
   }
 }
 
-.subscription-id {
-  color: #822808;
+.App .subscriptions .subscription .subscription-id {
+  color: var(--red);
   font-weight: 700;
-}
-
-a {
-  color: #822808;
-}
-
-.responsive-img {
-  max-width: 100%;
-  height: auto;
-}
-
-.divider {
-  height: 1px;
-  overflow: hidden;
-  background-color: #e0e0e0;
-}
-
-.text-bold {
-  font-weight: 700;
-}
-
-.text-center {
-  text-align: center;
-}
-
-.text-left {
-  text-align: left;
-}
-
-.text-right {
-  text-align: right;
-}
-
-.align-left {
-  float: left;
-}
-
-.align-right {
-  float: right;
 }
