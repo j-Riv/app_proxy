@@ -65,6 +65,10 @@
   color: var(--red);
 }
 
+.App .text-italic {
+  font-style: italic;
+}
+
 .App .text-center {
   text-align: center;
 }

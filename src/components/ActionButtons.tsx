@@ -31,14 +31,23 @@ const ActionButtons = (props: Props) => {
     handleUpdateAddress,
   } = props;
 
-  if (subscription.status !== 'CANCELLED') {
+  if (subscription.status !== Status.CANCEL) {
     return (
       <div className="actions-container">
         <div className="actions">
           <span className="text-bold">ACTIONS: </span>
+          {subscription.status === Status.PAUSE && (
+            <>
+              <br />
+              <span className="text-italic">
+                When re-activating a subscription. The next billing date will be
+                set to 2 days from today.
+              </span>
+            </>
+          )}
         </div>
         <div className="actions">
-          {subscription.status === 'ACTIVE' ? (
+          {subscription.status === Status.ACTIVE ? (
             <button
               className="btn btn--small btn-action"
               type="button"
@@ -49,7 +58,7 @@ const ActionButtons = (props: Props) => {
               PAUSE
             </button>
           ) : (
-            subscription.status !== 'CANCELLED' && (
+            subscription.status !== Status.CANCEL && (
               <button
                 className="btn btn--small btn-action"
                 type="button"
@@ -61,7 +70,7 @@ const ActionButtons = (props: Props) => {
               </button>
             )
           )}
-          {subscription.status !== 'CANCELLED' && (
+          {subscription.status !== Status.CANCEL && (
             <button
               className="btn btn--small btn-action"
               type="button"
