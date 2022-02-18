@@ -1,4 +1,5 @@
 import React from 'react';
+import styled from 'styled-components';
 import { Subscription } from '../types/subscription';
 
 interface Props {
@@ -33,9 +34,8 @@ const ActionButtons = (props: Props) => {
 
   if (subscription.status !== Status.CANCEL) {
     return (
-      <div className="actions-container">
-        <div className="actions">
-          <span className="text-bold">ACTIONS: </span>
+      <ActionsContainer>
+        <div className="actions-message">
           {subscription.status === Status.PAUSE && (
             <>
               <br />
@@ -46,10 +46,10 @@ const ActionButtons = (props: Props) => {
             </>
           )}
         </div>
-        <div className="actions">
+        <div className="actions-buttons-container">
           {subscription.status === Status.ACTIVE ? (
             <button
-              className="btn btn--small btn-action"
+              className="btn yellow-btn"
               type="button"
               onClick={() =>
                 updateStatus(customerId, subscription.id, Status.PAUSE)
@@ -60,7 +60,7 @@ const ActionButtons = (props: Props) => {
           ) : (
             subscription.status !== Status.CANCEL && (
               <button
-                className="btn btn--small btn-action"
+                className="btn yellow-btn"
                 type="button"
                 onClick={() =>
                   updateStatus(customerId, subscription.id, Status.ACTIVE)
@@ -72,7 +72,7 @@ const ActionButtons = (props: Props) => {
           )}
           {subscription.status !== Status.CANCEL && (
             <button
-              className="btn btn--small btn-action"
+              className="btn red-btn"
               type="button"
               onClick={() =>
                 updateStatus(customerId, subscription.id, Status.CANCEL)
@@ -82,7 +82,7 @@ const ActionButtons = (props: Props) => {
             </button>
           )}
           <button
-            className="btn btn--small btn-action"
+            className="btn yellow-btn"
             type="button"
             onClick={() =>
               updatePaymentMethod(
@@ -94,17 +94,69 @@ const ActionButtons = (props: Props) => {
             UPDATE PAYMENT METHOD
           </button>
           <button
-            className="btn btn--small btn-action"
+            className="btn red-btn"
             type="button"
             onClick={() => handleUpdateAddress(subscription)}
           >
             UPDATE SHIP ADDRESS
           </button>
         </div>
-      </div>
+      </ActionsContainer>
     );
   }
   return <div></div>;
 };
 
 export default ActionButtons;
+
+const ActionsContainer = styled.div`
+  .actions-message {
+    padding: 0 1em;
+  }
+  .actions-buttons-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+  }
+  .actions-buttons-container button {
+    margin: 1em;
+  }
+  button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1em;
+    padding: 10px 15px;
+    line-height: 1;
+    text-align: center;
+  }
+  .yellow-btn {
+    background-color: var(--yellow);
+  }
+  .yellow-btn:hover {
+    background-color: var(--yellow-focus);
+  }
+  .red-btn {
+    background-color: var(--red);
+  }
+  .red-btn:hover {
+    background-color: var(--red-focus);
+  }
+  @media only screen and (max-width: 768px) {
+    .actions-buttons-container {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .actions-buttons-container button {
+      margin: 0.5em;
+    }
+  }
+  @media only screen and (max-width: 468px) {
+    .actions-buttons-container {
+      display: grid;
+      grid-template-columns: 1fr;
+      padding: 1em;
+    }
+    .actions-buttons-container button {
+      margin: 0.5em 0;
+    }
+  }
+`;

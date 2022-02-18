@@ -609,11 +609,19 @@ const ShippingAddressForm = (props: Props) => {
           />
         </div>
         <Actions>
-          <button type="submit" className="btn" onClick={updateShippingAddress}>
+          <button
+            type="submit"
+            className="btn yellow-btn"
+            onClick={updateShippingAddress}
+          >
             Submit
           </button>
 
-          <button type="button" className="btn" onClick={() => setOpen(false)}>
+          <button
+            type="button"
+            className="btn red-btn"
+            onClick={() => setOpen(false)}
+          >
             Cancel
           </button>
         </Actions>
@@ -656,6 +664,27 @@ const Actions = styled.div`
   grid-gap: 1em;
   grid-template-columns: repeat(2, 1fr);
   margin-top: 2em;
+  padding: 1em;
+  button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1em;
+    padding: 10px 15px;
+    line-height: 1;
+    text-align: center;
+  }
+  .yellow-btn {
+    background-color: var(--yellow);
+  }
+  .yellow-btn:hover {
+    background-color: var(--yellow-focus);
+  }
+  .red-btn {
+    background-color: var(--red);
+  }
+  .red-btn:hover {
+    background-color: var(--red-focus);
+  }
 `;
 
 export default ShippingAddressForm;
