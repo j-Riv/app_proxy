@@ -1,13 +1,31 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useReducer } from 'react';
 import queryString from 'query-string';
-import styled from 'styled-components';
 import './App.css';
-import { formatDate, formatSubscriptionId, accountRedirect } from './utils';
-import { SubscriptionNode, Subscription, LineNode } from './types/subscription';
+import { accountRedirect } from './utils';
+import { SubscriptionNode, Subscription } from './types/subscription';
 import ShippingAddressForm from './components/ShippingAddressForm';
-import ActionButtons from './components/ActionButtons';
 import Loader from './components/Loader';
 import Toast from './components/Toast';
+import SubscriptionCard from './components/SubscriptionCard';
+
+const ACTIONS = {
+  TOGGLE: 'toggle',
+};
+
+const reducer = (state: any, action: any) => {
+  switch (action.type) {
+    case ACTIONS.TOGGLE:
+      Object.keys(state).forEach((key: any) => {
+        state[key] = false;
+      });
+      return {
+        ...state,
+        [action.key]: !state[action.key],
+      };
+    default:
+      throw new Error();
+  }
+};
 
 const App = () => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -21,6 +39,18 @@ const App = () => {
   const [showToast, setShowToast] = useState<boolean>(false);
   const [isToastError, setIsToastError] = useState<boolean>(false);
   const [toastMsg, setToastMsg] = useState<string>('');
+
+  const [state, dispatch] = useReducer(reducer, () => {
+    const count = subscriptions?.length;
+    if (count) {
+      const initialState: { [key: number]: boolean } = {};
+      for (let i = 0; i < count; i++) {
+        initialState[i] = false;
+      }
+      return initialState;
+    }
+    return null;
+  });
 
   const getSubscriptions = async (
     shopName: string,
@@ -41,6 +71,7 @@ const App = () => {
         }),
       });
       const data = await response.json();
+      console.log('DATA', data);
       setSubscriptions(data);
       setLoading(false);
     } catch (e: any) {
@@ -156,6 +187,10 @@ const App = () => {
     }, 3000);
   };
 
+  const handleSubscriptionToggle = (type: string, key: number) => {
+    dispatch({ type: type, key: key });
+  };
+
   return (
     <div className="App container page-width">
       {loading ? (
@@ -178,82 +213,23 @@ const App = () => {
               <div className="subscriptions-container">
                 <div className="subscriptions">
                   {subscriptions.length > 0 ? (
-                    subscriptions.map((subscription: SubscriptionNode) => {
-                      const s = subscription.node;
-                      return (
-                        <>
-                          <SubscriptionContainer
-                            key={subscription.node.id}
-                            className="section subscription"
-                          >
-                            <GridTwoColumn>
-                              <div className="subscription-id">
-                                #{formatSubscriptionId(s.id)}
-                              </div>
-                              <div className="subscription-status">
-                                <span className="align-right">
-                                  <span className="text-bold">STATUS: </span>
-                                  {s.status}
-                                </span>
-                              </div>
-                            </GridTwoColumn>
-                            <div className="subscription-billing-policy">
-                              <span className="text-bold">DELIVERY: </span>{' '}
-                              Every {s.billingPolicy.intervalCount}{' '}
-                              {s.billingPolicy.interval.toLowerCase()}
-                              (s)
-                            </div>
-                            <div className="subscription-next-billing-date">
-                              <span className="text-bold">
-                                NEXT ORDER DATE:{' '}
-                              </span>
-                              {formatDate(s.nextBillingDate)}
-                            </div>
-                            <div className="subscription-delivery-price">
-                              <span className="text-bold">SHIPPING COST: </span>
-                              ${parseFloat(s.deliveryPrice.amount).toFixed(2)}
-                            </div>
-                            <SubscriptionProducts>
-                              <div className="grid-container">
-                                {s.lines.edges.map((line: LineNode) => {
-                                  const l = line.node;
-                                  return (
-                                    <div key={line.node.id} className="product">
-                                      {l.variantImage && (
-                                        <img
-                                          key={line.node.id}
-                                          src={l.variantImage.originalSrc}
-                                          alt={l.variantImage.altText}
-                                          className="responsive-img"
-                                        />
-                                      )}
-                                      <span>
-                                        {l.title}
-                                        {l.variantTitle &&
-                                          ` - ${l.variantTitle}`}
-                                        <br />$
-                                        {parseFloat(
-                                          l.currentPrice.amount
-                                        ).toFixed(2)}{' '}
-                                        x {l.quantity}
-                                      </span>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </SubscriptionProducts>
-                            <ActionButtons
-                              customerId={customerId}
-                              subscription={s}
-                              updateStatus={updateStatus}
-                              updatePaymentMethod={updatePaymentMethod}
-                              handleUpdateAddress={handleUpdateAddress}
-                            />
-                          </SubscriptionContainer>
-                          <div className="divider"></div>
-                        </>
-                      );
-                    })
+                    subscriptions.map(
+                      (subscription: SubscriptionNode, index: number) => {
+                        return (
+                          <SubscriptionCard
+                            key={index}
+                            index={index}
+                            subscription={subscription}
+                            customerId={customerId}
+                            updateStatus={updateStatus}
+                            updatePaymentMethod={updatePaymentMethod}
+                            handleUpdateAddress={handleUpdateAddress}
+                            handleSubscriptionToggle={handleSubscriptionToggle}
+                            expanded={state[index]}
+                          />
+                        );
+                      }
+                    )
                   ) : (
                     <p style={{ textAlign: 'center' }}>
                       No Subscriptions Found!
@@ -271,31 +247,5 @@ const App = () => {
     </div>
   );
 };
-
-const SubscriptionProducts = styled.div`
-  .grid-container {
-    display: grid;
-    grid-gap: 1em;
-    grid-template-columns: repeat(4, 1fr);
-    @media only screen and (max-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-    @media only screen and (max-width: 468px) {
-      grid-template-columns: repeat(1, 1fr);
-    }
-  }
-`;
-
-const SubscriptionContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(1, fr);
-  grid-gap: 1em;
-`;
-
-const GridTwoColumn = styled.div`
-  display: grid;
-  grid-gap: 1em;
-  grid-template-columns: repeat(2, 1fr);
-`;
 
 export default App;

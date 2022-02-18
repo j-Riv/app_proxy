@@ -2,6 +2,8 @@
 :root {
   --red: #802a19;
   --red-focus: #551c11;
+  --yellow: #f3a126;
+  --yellow-focus: #c17c21;
 }
 
 /* Fix Position */
@@ -11,7 +13,7 @@
 }
 
 .App {
-  text-align: center;
+  /* text-align: center; */
   color: #000;
   /* helpers */
   /* subscriptions */
@@ -21,7 +23,8 @@
   background-color: var(--red);
 }
 
-.App .background-s-red:hover, .App .background-s-red:focus {
+.App .background-s-red:hover,
+.App .background-s-red:focus {
   background-color: var(--red-focus);
 }
 
@@ -62,7 +65,6 @@
 
 .App .text-bold {
   font-weight: 700;
-  color: var(--red);
 }
 
 .App .text-italic {
@@ -97,7 +99,7 @@
   padding-right: 55px;
 }
 
-@media only screen and (max-width: 749px) {
+/* @media only screen and (max-width: 749px) {
   .App .page-width {
     padding-left: 22px;
     padding-right: 22px;
@@ -130,4 +132,4 @@
 .App .subscriptions .subscription .subscription-id {
   color: var(--red);
   font-weight: 700;
-}
+} */
