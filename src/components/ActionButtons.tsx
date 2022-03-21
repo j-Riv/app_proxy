@@ -1,113 +1,7 @@
-import React from 'react';
-import styled from 'styled-components';
-import { Subscription } from '../types/subscription';
-
-interface Props {
-  customerId: string;
-  subscription: Subscription;
-  updateStatus: (
-    customerId: string,
-    subscriptionId: string,
-    status: string
-  ) => Promise<void>;
-  updatePaymentMethod: (
-    customerId: string,
-    paymentMethodId: string
-  ) => Promise<void>;
-  handleUpdateAddress: (subscription: Subscription) => void;
-}
-
-enum Status {
-  ACTIVE = 'ACTIVE',
-  PAUSE = 'PAUSED',
-  CANCEL = 'CANCELLED',
-}
-
-const ActionButtons = (props: Props) => {
-  const {
-    customerId,
-    subscription,
-    updateStatus,
-    updatePaymentMethod,
-    handleUpdateAddress,
-  } = props;
-
-  if (subscription.status !== Status.CANCEL) {
-    return (
-      <ActionsContainer>
-        <div className="actions-message">
-          {subscription.status === Status.PAUSE && (
-            <>
-              <br />
-              <span className="text-italic">
-                When re-activating a subscription. The next billing date will be
-                set to 2 days from today.
-              </span>
-            </>
-          )}
-        </div>
-        <div className="actions-buttons-container">
-          {subscription.status === Status.ACTIVE ? (
-            <button
-              className="btn yellow-btn"
-              type="button"
-              onClick={() =>
-                updateStatus(customerId, subscription.id, Status.PAUSE)
-              }
-            >
-              PAUSE
-            </button>
-          ) : (
-            subscription.status !== Status.CANCEL && (
-              <button
-                className="btn yellow-btn"
-                type="button"
-                onClick={() =>
-                  updateStatus(customerId, subscription.id, Status.ACTIVE)
-                }
-              >
-                Activate
-              </button>
-            )
-          )}
-          {subscription.status !== Status.CANCEL && (
-            <button
-              className="btn red-btn"
-              type="button"
-              onClick={() =>
-                updateStatus(customerId, subscription.id, Status.CANCEL)
-              }
-            >
-              CANCEL
-            </button>
-          )}
-          <button
-            className="btn yellow-btn"
-            type="button"
-            onClick={() =>
-              updatePaymentMethod(
-                customerId,
-                subscription.customerPaymentMethod.id
-              )
-            }
-          >
-            UPDATE PAYMENT METHOD
-          </button>
-          <button
-            className="btn red-btn"
-            type="button"
-            onClick={() => handleUpdateAddress(subscription)}
-          >
-            UPDATE SHIP ADDRESS
-          </button>
-        </div>
-      </ActionsContainer>
-    );
-  }
-  return <div></div>;
-};
-
-export default ActionButtons;
+import React, { useState } from "react"
+import styled from "styled-components"
+import Button from "./Button"
+import { Subscription } from "../types/subscription"
 
 const ActionsContainer = styled.div`
   .actions-message {
@@ -159,4 +53,104 @@ const ActionsContainer = styled.div`
       margin: 0.5em 0;
     }
   }
-`;
+`
+
+interface Props {
+  customerId: string
+  subscription: Subscription
+  updateStatus: (
+    customerId: string,
+    subscriptionId: string,
+    status: string
+  ) => Promise<boolean>
+  updatePaymentMethod: (
+    customerId: string,
+    paymentMethodId: string
+  ) => Promise<boolean>
+  handleUpdateAddress: (subscription: Subscription) => void
+}
+
+const ActionButtons = (props: Props) => {
+  const {
+    customerId,
+    subscription,
+    updateStatus,
+    updatePaymentMethod,
+    handleUpdateAddress,
+  } = props
+
+  enum Status {
+    ACTIVE = "ACTIVE",
+    PAUSE = "PAUSED",
+    CANCEL = "CANCELLED",
+  }
+
+  const handleActivate = async () =>
+    updateStatus(customerId, subscription.id, Status.ACTIVE)
+
+  const handlePause = async () =>
+    updateStatus(customerId, subscription.id, Status.PAUSE)
+
+  const handleCancel = async () =>
+    updateStatus(customerId, subscription.id, Status.CANCEL)
+
+  const handleUpdatePaymentMethod = async () =>
+    updatePaymentMethod(customerId, subscription.customerPaymentMethod.id)
+
+  if (subscription.status !== Status.CANCEL) {
+    return (
+      <ActionsContainer>
+        <div className="actions-message">
+          {subscription.status === Status.PAUSE && (
+            <>
+              <br />
+              <span className="text-italic">
+                When re-activating a subscription. The next billing date will be
+                set to 2 days from today.
+              </span>
+            </>
+          )}
+        </div>
+        <div className="actions-buttons-container">
+          {subscription.status === Status.ACTIVE ? (
+            <Button
+              color="yellow-btn"
+              handleClick={handlePause}
+              label={Status.PAUSE}
+            />
+          ) : (
+            subscription.status !== Status.CANCEL && (
+              <Button
+                color="yellow-btn"
+                handleClick={handleActivate}
+                label={Status.ACTIVE}
+              />
+            )
+          )}
+          {subscription.status !== Status.CANCEL && (
+            <Button
+              color="red-btn"
+              handleClick={handleCancel}
+              label={Status.CANCEL}
+            />
+          )}
+          <Button
+            color="yellow-btn"
+            handleClick={handleUpdatePaymentMethod}
+            label="UPDATE PAYMENT METHOD"
+          />
+          <button
+            className="btn red-btn"
+            type="button"
+            onClick={() => handleUpdateAddress(subscription)}
+          >
+            UPDATE SHIP ADDRESS
+          </button>
+        </div>
+      </ActionsContainer>
+    )
+  }
+  return <div />
+}
+
+export default ActionButtons

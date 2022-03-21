@@ -1,59 +1,59 @@
 export interface SubscriptionNode {
-  node: Subscription;
+  node: Subscription
 }
 
 export interface Subscription {
-  id: string;
-  status: string;
+  id: string
+  status: string
   billingPolicy: {
-    intervalCount: number;
-    interval: string;
-  };
-  nextBillingDate: string;
+    intervalCount: number
+    interval: string
+  }
+  nextBillingDate: string
   deliveryPrice: {
-    amount: string;
-  };
+    amount: string
+  }
   customerPaymentMethod: {
-    id: string;
-  };
+    id: string
+  }
   deliveryMethod: {
     address: {
-      company: string;
-      address1: string;
-      address2: string;
-      city: string;
-      province: string;
-      country: string;
-      zip: string;
-      firstName: string;
-      lastName: string;
-      phone: string;
-    };
-  };
+      company: string
+      address1: string
+      address2: string
+      city: string
+      province: string
+      country: string
+      zip: string
+      firstName: string
+      lastName: string
+      phone: string
+    }
+  }
   lines: {
-    edges: LineNode[];
-  };
+    edges: LineNode[]
+  }
 }
 
 export interface LineNode {
-  node: Line;
+  node: Line
 }
 
 export interface Line {
-  id: string;
-  title: string;
-  variantTitle: string;
-  quantity: string;
+  id: string
+  title: string
+  variantTitle: string
+  quantity: string
   variantImage: {
-    altText: string;
-    originalSrc: string;
-  };
+    altText: string
+    originalSrc: string
+  }
   currentPrice: {
-    amount: string;
-  };
+    amount: string
+  }
   pricingPolicy: {
     basePrice: {
-      amount: string;
-    };
-  };
+      amount: string
+    }
+  }
 }
