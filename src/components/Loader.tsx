@@ -1,9 +1,5 @@
-import React from 'react';
-import styled, { keyframes } from 'styled-components';
-
-const Loader = () => {
-  return <Spinner>Loading...</Spinner>;
-};
+import React from "react"
+import styled, { keyframes } from "styled-components"
 
 const load3 = keyframes`
   0% {
@@ -14,7 +10,7 @@ const load3 = keyframes`
     -webkit-transform: rotate(360deg);
     transform: rotate(360deg);
   }
-`;
+`
 
 const Spinner = styled.div`
   font-size: 10px;
@@ -59,14 +55,14 @@ const Spinner = styled.div`
     position: absolute;
     top: 0;
     left: 0;
-    content: '';
+    content: "";
   }
   &:after {
     background: #fff;
     width: 75%;
     height: 75%;
     border-radius: 50%;
-    content: '';
+    content: "";
     margin: auto;
     position: absolute;
     top: 0;
@@ -74,6 +70,8 @@ const Spinner = styled.div`
     bottom: 0;
     right: 0;
   }
-`;
+`
 
-export default Loader;
+const Loader = () => <Spinner>Loading...</Spinner>
+
+export default Loader

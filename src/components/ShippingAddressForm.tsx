@@ -1,21 +1,78 @@
-import React, { useState, useEffect, createRef } from 'react';
-import styled from 'styled-components';
-import { Subscription } from '../types/subscription';
-import countries from '../data/countries';
-import { formatSubscriptionId, accountRedirect } from '../utils';
-import Toast from '../components/Toast';
+import React, { useState, useEffect, createRef } from "react"
+import styled from "styled-components"
+import { Subscription } from "../types/subscription"
+import countries from "../data/countries"
+import { formatSubscriptionId, accountRedirect } from "../utils"
+import Toast from "./Toast"
+import Spinner from "./Spinner"
+
+const Container = styled.div`
+  input,
+  select {
+    width: 100%;
+  }
+  .input-field {
+    margin: 1em 0;
+  }
+`
+
+const GridTwoColumn = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 1em;
+  @media only screen and (max-width: 468px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+`
+
+const GridThreeColumn = styled.div`
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-gap: 1em;
+  @media only screen and (max-width: 468px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+`
+
+const Actions = styled.div`
+  display: grid;
+  grid-gap: 1em;
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: 2em;
+  padding: 1em;
+  button {
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 1em;
+    padding: 10px 15px;
+    line-height: 1;
+    text-align: center;
+  }
+  .yellow-btn {
+    background-color: var(--yellow);
+  }
+  .yellow-btn:hover {
+    background-color: var(--yellow-focus);
+  }
+  .red-btn {
+    background-color: var(--red);
+  }
+  .red-btn:hover {
+    background-color: var(--red-focus);
+  }
+`
 
 interface Props {
-  shop: string;
-  customerId: string;
-  token: string;
-  subscription: Subscription;
-  setOpen: (value: React.SetStateAction<boolean>) => void;
+  shop: string
+  customerId: string
+  token: string
+  subscription: Subscription
+  setOpen: (value: React.SetStateAction<boolean>) => void
   getSubscriptions: (
     shop: string,
     token: string,
     customerId: string
-  ) => Promise<void>;
+  ) => Promise<void>
 }
 
 const ShippingAddressForm = (props: Props) => {
@@ -26,109 +83,109 @@ const ShippingAddressForm = (props: Props) => {
     subscription,
     setOpen,
     getSubscriptions,
-  } = props;
-  const Countries: { [key: string]: string[][] } = countries;
-  const [provinces, setProvinces] = useState<string[][]>();
+  } = props
+  const Countries: { [key: string]: string[][] } = countries
+  const [provinces, setProvinces] = useState<string[][]>()
   // data
-  const address = subscription.deliveryMethod.address;
-  const [company, setCompany] = useState<string>(address.company);
-  const [address1, setAddress1] = useState<string>(address.address1);
-  const [address2, setAddress2] = useState<string>(address.address2);
-  const [city, setCity] = useState<string>(address.city);
-  const [province, setProvince] = useState<string>(address.province);
-  const [country, setCountry] = useState<string>(address.country);
-  const [zip, setZip] = useState<string>(address.zip);
-  const [firstName, setFirstName] = useState<string>(address.firstName);
-  const [lastName, setLastName] = useState<string>(address.lastName);
-  const [phone, setPhone] = useState<string>(address.phone);
+  const { address } = subscription.deliveryMethod
+  const [company, setCompany] = useState<string>(address.company)
+  const [address1, setAddress1] = useState<string>(address.address1)
+  const [address2, setAddress2] = useState<string>(address.address2)
+  const [city, setCity] = useState<string>(address.city)
+  const [province, setProvince] = useState<string>(address.province)
+  const [country, setCountry] = useState<string>(address.country)
+  const [zip, setZip] = useState<string>(address.zip)
+  const [firstName, setFirstName] = useState<string>(address.firstName)
+  const [lastName, setLastName] = useState<string>(address.lastName)
+  const [phone, setPhone] = useState<string>(address.phone)
   // toast
-  const [showToast, setShowToast] = useState<boolean>(false);
-  const [isToastError, setIsToastError] = useState<boolean>(false);
-  const [toastMsg, setToastMsg] = useState<string>('');
+  const [showToast, setShowToast] = useState<boolean>(false)
+  const [isToastError, setIsToastError] = useState<boolean>(false)
+  const [toastMsg, setToastMsg] = useState<string>("")
+  const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
     if (Countries[country]) {
-      setProvinces(Countries[country]);
+      setProvinces(Countries[country])
     }
-  }, []);
+  }, [])
 
   const handleCountryChange = (event: { target: { value: string } }) => {
-    const c = event.target.value;
-    setCountry(c);
+    const c = event.target.value
+    setCountry(c)
     if (Countries[c]) {
-      setProvinces(Countries[c]);
+      setProvinces(Countries[c])
     } else {
-      setProvinces([]);
+      setProvinces([])
     }
-  };
+  }
 
   const handleProvinceChange = (event: { target: { value: string } }) => {
-    const province = event.target.value;
-    setProvince(province);
-  };
+    const province = event.target.value
+    setProvince(province)
+  }
 
   const handleFirstNameChange = (event: { target: { value: string } }) => {
-    const fn = event.target.value;
-    setFirstName(fn);
-  };
+    const fn = event.target.value
+    setFirstName(fn)
+  }
 
   const handleLastNameChange = (event: { target: { value: string } }) => {
-    const ln = event.target.value;
-    setLastName(ln);
-  };
+    const ln = event.target.value
+    setLastName(ln)
+  }
 
   const handleCompanyChange = (event: { target: { value: string } }) => {
-    const company = event.target.value;
-    setCompany(company);
-  };
+    const company = event.target.value
+    setCompany(company)
+  }
 
   const handleAddress1Change = (event: { target: { value: string } }) => {
-    const addr1 = event.target.value;
-    setAddress1(addr1);
-  };
+    const addr1 = event.target.value
+    setAddress1(addr1)
+  }
 
   const handleAddress2Change = (event: { target: { value: string } }) => {
-    const addr2 = event.target.value;
-    setAddress2(addr2);
-  };
+    const addr2 = event.target.value
+    setAddress2(addr2)
+  }
 
   const handleCityChange = (event: { target: { value: string } }) => {
-    const city = event.target.value;
-    setCity(city);
-  };
+    const city = event.target.value
+    setCity(city)
+  }
 
   const handleZipChange = (event: { target: { value: string } }) => {
-    const zip = event.target.value;
-    setZip(zip);
-  };
+    const zip = event.target.value
+    setZip(zip)
+  }
 
   const handlePhoneChange = (event: { target: { value: string } }) => {
-    const phone = event.target.value;
-    setPhone(phone);
-  };
+    const phone = event.target.value
+    setPhone(phone)
+  }
 
   const handleHideToast = () => {
     setTimeout(() => {
-      setIsToastError(false);
-      setToastMsg('');
-      setShowToast(false);
-    }, 3000);
-  };
+      setIsToastError(false)
+      setToastMsg("")
+      setShowToast(false)
+    }, 3000)
+  }
 
-  const form = createRef<HTMLFormElement>();
+  const form = createRef<HTMLFormElement>()
 
-  const validate = () => {
-    return form?.current?.reportValidity();
-  };
+  const validate = () => form?.current?.reportValidity()
 
   const updateShippingAddress = async () => {
     if (validate()) {
+      setLoading(true)
       try {
         const response = await fetch(`/apps/app_proxy/subscription/address`, {
-          method: 'POST',
+          method: "POST",
           headers: {
-            Accept: 'application/json',
-            'Content-Type': 'application/json',
+            Accept: "application/json",
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             token,
@@ -145,27 +202,29 @@ const ShippingAddressForm = (props: Props) => {
             company,
             phone,
           }),
-        });
-        const data = await response.json();
+        })
+        const data = await response.json()
         if (data.errors) {
-          setIsToastError(true);
-          setToastMsg(data.errors[0].message);
-          setShowToast(true);
-          handleHideToast();
+          setIsToastError(true)
+          setToastMsg(data.errors[0].message)
+          setShowToast(true)
+          handleHideToast()
         } else {
-          setIsToastError(false);
-          setToastMsg('Update Successful.');
-          setShowToast(true);
-          handleHideToast();
-          getSubscriptions(shop, token, customerId);
-          setOpen(false);
+          setIsToastError(false)
+          setToastMsg("Update Successful.")
+          setShowToast(true)
+          handleHideToast()
+          getSubscriptions(shop, token, customerId)
+          setOpen(false)
         }
+        setLoading(false)
       } catch (e: any) {
-        console.log('ERROR', e.message);
-        accountRedirect();
+        console.log("ERROR", e.message)
+        setLoading(false)
+        accountRedirect()
       }
     }
-  };
+  }
 
   return (
     <Container className="page-width">
@@ -278,13 +337,11 @@ const ShippingAddressForm = (props: Props) => {
               onChange={handleProvinceChange}
             >
               {provinces &&
-                provinces.map((province: string[]) => {
-                  return (
-                    <option key={province[0]} value={province[0]}>
-                      {province[1]}
-                    </option>
-                  );
-                })}
+                provinces.map((province: string[]) => (
+                  <option key={province[0]} value={province[0]}>
+                    {province[1]}
+                  </option>
+                ))}
             </select>
           </div>
 
@@ -613,8 +670,9 @@ const ShippingAddressForm = (props: Props) => {
             type="submit"
             className="btn yellow-btn"
             onClick={updateShippingAddress}
+            disabled={loading}
           >
-            Submit
+            {loading ? <Spinner /> : "SUBMIT"}
           </button>
 
           <button
@@ -628,63 +686,7 @@ const ShippingAddressForm = (props: Props) => {
       </form>
       <Toast show={showToast} isError={isToastError} toastMsg={toastMsg} />
     </Container>
-  );
-};
+  )
+}
 
-const Container = styled.div`
-  input,
-  select {
-    width: 100%;
-  }
-  .input-field {
-    margin: 1em 0;
-  }
-`;
-
-const GridTwoColumn = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 1em;
-  @media only screen and (max-width: 468px) {
-    grid-template-columns: repeat(1, 1fr);
-  }
-`;
-
-const GridThreeColumn = styled.div`
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  grid-gap: 1em;
-  @media only screen and (max-width: 468px) {
-    grid-template-columns: repeat(1, 1fr);
-  }
-`;
-
-const Actions = styled.div`
-  display: grid;
-  grid-gap: 1em;
-  grid-template-columns: repeat(2, 1fr);
-  margin-top: 2em;
-  padding: 1em;
-  button {
-    border-radius: 8px;
-    border: 1px solid transparent;
-    font-size: 1em;
-    padding: 10px 15px;
-    line-height: 1;
-    text-align: center;
-  }
-  .yellow-btn {
-    background-color: var(--yellow);
-  }
-  .yellow-btn:hover {
-    background-color: var(--yellow-focus);
-  }
-  .red-btn {
-    background-color: var(--red);
-  }
-  .red-btn:hover {
-    background-color: var(--red-focus);
-  }
-`;
-
-export default ShippingAddressForm;
+export default ShippingAddressForm

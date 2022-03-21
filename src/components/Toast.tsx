@@ -1,23 +1,5 @@
-import React from 'react';
-import styled from 'styled-components';
-
-interface Props {
-  show: boolean;
-  isError: boolean;
-  toastMsg: string;
-}
-
-const Toast = ({ show, isError, toastMsg }: Props) => {
-  if (show) {
-    return (
-      <Snackbar className={isError ? 'toast-error' : 'toast'}>
-        {toastMsg}
-      </Snackbar>
-    );
-  } else {
-    return <div></div>;
-  }
-};
+import React from "react"
+import styled from "styled-components"
 
 const Snackbar = styled.div`
   min-width: 250px; /* Set a default minimum width */
@@ -34,6 +16,24 @@ const Snackbar = styled.div`
   &.toast-error {
     background: #802a19;
   }
-`;
+`
 
-export default Toast;
+interface Props {
+  show: boolean
+  isError: boolean
+  toastMsg: string
+}
+
+const Toast = ({ show, isError, toastMsg }: Props) => {
+  if (show) {
+    return (
+      <Snackbar className={isError ? "toast-error" : "toast"}>
+        {toastMsg}
+      </Snackbar>
+    )
+  } else {
+    return <div />
+  }
+}
+
+export default Toast
