@@ -11,6 +11,7 @@
   "rules": {
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": ["error"],
+    "@typescript-eslint/no-unused-vars": ["warn"],
     "import/no-unresolved": "error",
     "no-plusplus": [0],
     "no-else-return": "off",

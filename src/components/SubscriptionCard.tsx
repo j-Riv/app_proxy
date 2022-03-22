@@ -125,6 +125,7 @@ const SubscriptionCard: React.FC<Props> = ({
           <p>
             Every {s.billingPolicy.intervalCount}{" "}
             {s.billingPolicy.interval.toLowerCase()}
+            {s.billingPolicy.intervalCount > 1 ? "s" : ""}
           </p>
         </div>
         <div className="subscripiton-next-order-date">
@@ -145,7 +146,7 @@ const SubscriptionCard: React.FC<Props> = ({
         <div className="collapsible">
           <div className="subscription-more-details">
             <p>
-              <span className="text-bold">SHIPPING: </span> $
+              <span className="text-bold">DELIVERY COST: </span> $
               {parseFloat(s.deliveryPrice.amount).toFixed(2)}
             </p>
           </div>

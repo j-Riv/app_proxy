@@ -1,4 +1,4 @@
-import React, { useState } from "react"
+import React from "react"
 import styled from "styled-components"
 import Button from "./Button"
 import { Subscription } from "../types/subscription"
@@ -116,14 +116,14 @@ const ActionButtons = (props: Props) => {
             <Button
               color="yellow-btn"
               handleClick={handlePause}
-              label={Status.PAUSE}
+              label="PAUSE SUBSCRIPTION"
             />
           ) : (
             subscription.status !== Status.CANCEL && (
               <Button
                 color="yellow-btn"
                 handleClick={handleActivate}
-                label={Status.ACTIVE}
+                label="ACTIVATE SUBSCRIPTION"
               />
             )
           )}
@@ -131,7 +131,7 @@ const ActionButtons = (props: Props) => {
             <Button
               color="red-btn"
               handleClick={handleCancel}
-              label={Status.CANCEL}
+              label="CANCEL SUBSCRIPTION"
             />
           )}
           <Button

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useReducer } from "react"
+import React, { useEffect, useState, useReducer, useCallback } from "react"
 import queryString from "query-string"
 import "./App.css"
 import { accountRedirect } from "./utils"
@@ -60,36 +60,35 @@ const App = () => {
     }, 3000)
   }
 
-  const getSubscriptions = async (
-    shopName: string,
-    accessToken: string,
-    customer: string
-  ) => {
-    try {
-      const response = await fetch(`/apps/app_proxy/subscriptions`, {
-        method: "POST",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          token: accessToken,
-          shop: shopName,
-          customerId: customer,
-        }),
-      })
-      const data = await response.json()
-      setSubscriptions(data)
-      setLoading(false)
-    } catch (e: any) {
-      console.log("ERROR", e.message)
-      setIsToastError(true)
-      setToastMsg("ERROR, Failed to get Subscriptions.")
-      setShowToast(true)
-      handleHideToast()
-      accountRedirect()
-    }
-  }
+  const getSubscriptions = useCallback(
+    async (shopName: string, accessToken: string, customer: string) => {
+      try {
+        const response = await fetch(`/apps/app_proxy/subscriptions`, {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: accessToken,
+            shop: shopName,
+            customerId: customer,
+          }),
+        })
+        const data = await response.json()
+        setSubscriptions(data)
+        setLoading(false)
+      } catch (e: any) {
+        console.log("ERROR", e.message)
+        setIsToastError(true)
+        setToastMsg("ERROR, Failed to get Subscriptions.")
+        setShowToast(true)
+        handleHideToast()
+        accountRedirect()
+      }
+    },
+    []
+  )
 
   useEffect(() => {
     const params = queryString.parse(window.location.search)
@@ -104,7 +103,7 @@ const App = () => {
         getSubscriptions(shopName, accessToken, customer)
       }
     }
-  }, [])
+  }, [getSubscriptions])
 
   const updateStatus = async (
     customerId: string,
